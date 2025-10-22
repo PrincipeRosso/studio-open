@@ -1,0 +1,98 @@
+{
+  "nav": {
+    "playground": "Playground",
+    "models": "Models",
+    "documentation": "Documentation",
+    "settings": "Settings",
+    "preferences": "Preferences",
+    "history": "History",
+    "starred": "Starred",
+    "general": "General",
+    "team": "Team",
+    "billing": "Billing",
+    "limits": "Limits",
+    "introduction": "Introduction",
+    "getStarted": "Get Started",
+    "tutorials": "Tutorials",
+    "changelog": "Changelog",
+    "genesis": "Genesis",
+    "explorer": "Explorer",
+    "quantum": "Quantum",
+    "platform": "Navigation",
+    "home": "Home",
+    "activities": "Activities",
+    "memory": "Memory",
+    "resources": "Resources",
+    "agents": "Agents"
+  },
+  "projects": {
+    "designEngineering": "Design Engineering",
+    "salesMarketing": "Sales & Marketing",
+    "travel": "Travel",
+    "label": "Threads"
+  },
+  "teams": {
+    "acmeInc": "Acme Inc",
+    "acmeCorp": "Acme Corp.",
+    "evilCorp": "Evil Corp.",
+    "label": "Teams",
+    "addTeam": "Add team"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "italian": "Italian"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "buildingApplication": "Building Your Application",
+    "dataFetching": "Data Fetching",
+    "more": "More"
+  },
+  "user": {
+    "logout": "Log out"
+  },
+  "chatInput": {
+    "placeholder": "Describe what you need...",
+    "attachFile": "Attach file",
+    "sendMessage": "Send message",
+    "uploading": "Uploading"
+  },
+  "announcement": {
+    "title": "🎉 New features coming soon!",
+    "message": "We're working on new features to improve your experience.",
+    "link": {
+      "text": "Learn more",
+      "url": "#"
+    },
+    "dismiss": "Dismiss announcement"
+  },
+  "typewriter": {
+    "texts": [
+      "What do you need?",
+      "What do you want to work on?",
+      "Which project do you want to create?",
+      "How can I help you today?"
+    ]
+  },
+  "auth": {
+    "welcome": "Welcome",
+    "signInDescription": "Sign in to your account or create a new one",
+    "signUpDescription": "Create a new account to get started",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "passwordMismatch": "Passwords do not match",
+    "signingIn": "Signing in...",
+    "signingUp": "Signing up...",
+    "checkEmail": "Check your email to confirm your account"
+  }
+}

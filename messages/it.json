@@ -1,0 +1,104 @@
+{
+  "nav": {
+    "playground": "Playground",
+    "models": "Modelli",
+    "documentation": "Documentazione",
+    "settings": "Impostazioni",
+    "preferences": "Preferenze",
+    "history": "Cronologia",
+    "starred": "Preferiti",
+    "general": "Generale",
+    "team": "Team",
+    "billing": "Fatturazione",
+    "limits": "Limiti",
+    "introduction": "Introduzione",
+    "getStarted": "Inizia",
+    "getstarted": "Inizia",
+    "tutorials": "Tutorial",
+    "changelog": "Changelog",
+    "genesis": "Genesis",
+    "explorer": "Explorer",
+    "quantum": "Quantum",
+    "platform": "Navigazione",
+    "home": "Home",
+    "activities": "Attività",
+    "memory": "Memoria",
+    "resources": "Risorse",
+    "agents": "Agenti"
+  },
+  "projects": {
+    "designEngineering": "Ingegneria del Design",
+    "designengineering": "Ingegneria del Design",
+    "salesMarketing": "Vendite e Marketing",
+    "salesmarketing": "Vendite e Marketing",
+    "travel": "Viaggi",
+    "label": "Thread"
+  },
+  "teams": {
+    "acmeInc": "Acme Inc",
+    "acmeinc": "Acme Inc",
+    "acmeCorp": "Acme Corp.",
+    "acmecorp": "Acme Corp.",
+    "evilCorp": "Evil Corp.",
+    "evilcorp": "Evil Corp.",
+    "label": "Team",
+    "addTeam": "Aggiungi team"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "system": "Sistema"
+  },
+  "language": {
+    "label": "Lingua",
+    "english": "Inglese",
+    "italian": "Italiano"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "buildingApplication": "Costruzione dell'Applicazione",
+    "dataFetching": "Recupero Dati",
+    "more": "Altro"
+  },
+  "user": {
+    "logout": "Esci"
+  },
+  "chatInput": {
+    "placeholder": "Descrivi di cosa hai bisogno...",
+    "attachFile": "Allega file",
+    "sendMessage": "Invia messaggio",
+    "uploading": "Caricamento"
+  },
+  "announcement": {
+    "title": "Novità in arrivo!",
+    "message": "Stiamo lavorando a nuove funzionalità per migliorare la tua esperienza.",
+    "link": {
+      "text": "Scopri di più",
+      "url": "#"
+    },
+    "dismiss": "Chiudi annuncio"
+  },
+  "typewriter": {
+    "texts": [
+      "Di cosa hai bisogno?",
+      "Su cosa vuoi lavorare?",
+      "Quale progetto vuoi realizzare?",
+      "Come posso aiutarti oggi?"
+    ]
+  },
+  "auth": {
+    "welcome": "Benvenuto",
+    "signInDescription": "Accedi al tuo account o creane uno nuovo",
+    "signUpDescription": "Crea un nuovo account per iniziare",
+    "signIn": "Accedi",
+    "signUp": "Registrati",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Conferma Password",
+    "passwordMismatch": "Le password non coincidono",
+    "signingIn": "Accesso in corso...",
+    "signingUp": "Registrazione in corso...",
+    "checkEmail": "Controlla la tua email per confermare l'account"
+  }
+}

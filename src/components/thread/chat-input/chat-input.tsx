@@ -22,6 +22,7 @@ export interface ChatInputProps {
   autoFocus?: boolean;
   value?: string;
   onChange?: (value: string) => void;
+  isLoading?: boolean;
 }
 
 export interface UploadedFile {
@@ -33,7 +34,7 @@ export interface UploadedFile {
 }
 
 export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
-  ({ onSubmit, placeholder, loading = false, disabled = false, autoFocus = true, value: controlledValue, onChange: controlledOnChange }, ref) => {
+  ({ onSubmit, placeholder, loading = false, disabled = false, autoFocus = true, value: controlledValue, onChange: controlledOnChange, isLoading = false }, ref) => {
     const t = useTranslations('chatInput');
     const isControlled = controlledValue !== undefined && controlledOnChange !== undefined;
     const [uncontrolledValue, setUncontrolledValue] = useState('');
@@ -128,6 +129,30 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
     const removeFile = (index: number) => {
       setUploadedFiles(prev => prev.filter((_, i) => i !== index));
     };
+
+    // Skeleton per lo stato di caricamento
+    if (isLoading) {
+      return (
+        <div className="mx-auto w-full max-w-2xl">
+          <Card className="bg-card border-border shadow-sm rounded-3xl">
+            <CardContent className="p-0">
+              <div className="relative flex flex-col w-full h-full justify-end">
+                <div className="relative flex items-end gap-2 px-3 pb-2">
+                  <div className="flex-1 min-h-[80px] bg-muted rounded-2xl animate-pulse" />
+                </div>
+                <div className="flex items-center justify-between px-3 pb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
+                    <div className="w-24 h-6 bg-muted rounded animate-pulse" />
+                  </div>
+                  <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
 
     return (
       <div className="mx-auto w-full max-w-2xl">

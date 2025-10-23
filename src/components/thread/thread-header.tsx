@@ -16,13 +16,15 @@ interface ThreadHeaderProps {
   onTitleChange?: (newTitle: string) => void
   onDeleteThread?: () => void
   onShareThread?: () => void
+  isLoading?: boolean
 }
 
 export const ThreadHeader: React.FC<ThreadHeaderProps> = ({
   title,
   onTitleChange,
   onDeleteThread,
-  onShareThread
+  onShareThread,
+  isLoading = false
 }) => {
   const [isEditingTitle, setIsEditingTitle] = React.useState(false)
   const [editedTitle, setEditedTitle] = React.useState(title)
@@ -41,6 +43,24 @@ export const ThreadHeader: React.FC<ThreadHeaderProps> = ({
       setEditedTitle(title)
       setIsEditingTitle(false)
     }
+  }
+
+  // Skeleton per lo stato di caricamento
+  if (isLoading) {
+    return (
+      <div className="bg-background/40 backdrop-blur-sm">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="min-w-0 flex-1">
+              <div className="h-7 w-48 bg-muted rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-muted rounded animate-pulse" />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

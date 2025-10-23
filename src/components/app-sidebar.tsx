@@ -15,7 +15,7 @@ import {
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
+import { NavThreads } from "@/components/nav-threads"
 import { NavUser } from "@/components/nav-user"
 import { StudioLogo } from "@/components/studio-logo"
 import { useAuth } from "@/contexts/auth-context"
@@ -167,7 +167,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavProjects />
+        <NavThreads />
       </SidebarContent>
       {user && (
         <SidebarFooter>

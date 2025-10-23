@@ -15,6 +15,7 @@ interface Message {
 interface ChatAreaProps {
   messages: Message[]
   isLoading?: boolean
+  isPageLoading?: boolean
 }
 
 const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
@@ -95,7 +96,7 @@ const EmptyState: React.FC = () => {
   )
 }
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ messages, isLoading = false }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ messages, isLoading = false, isPageLoading = false }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -105,6 +106,36 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, isLoading = false 
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, isLoading])
+
+  // Skeleton per lo stato di caricamento della pagina
+  if (isPageLoading) {
+    return (
+      <div className="h-full overflow-y-auto scroll-smooth">
+        <div className="min-h-full flex flex-col">
+          <div className="flex-1 mx-auto w-full max-w-2xl">
+            {/* Skeleton per 3 messaggi */}
+            {[1, 2, 3].map((index) => (
+              <div key={index} className="flex flex-col p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-muted rounded-full animate-pulse" />
+                  <div className="w-16 h-4 bg-muted rounded animate-pulse" />
+                </div>
+                <div className="w-full">
+                  <div className="bg-muted rounded-3xl p-4 animate-pulse">
+                    <div className="space-y-2">
+                      <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
+                      <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: `${40 + Math.random() * 40}%` }} />
+                      {Math.random() > 0.5 && <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: `${30 + Math.random() * 50}%` }} />}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (messages.length === 0 && !isLoading) {
     return (

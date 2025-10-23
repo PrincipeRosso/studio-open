@@ -32,7 +32,7 @@
     "salesMarketing": "Vendite e Marketing",
     "salesmarketing": "Vendite e Marketing",
     "travel": "Viaggi",
-    "label": "Thread"
+    "label": "Progetti"
   },
   "teams": {
     "acmeInc": "Acme Inc",
@@ -86,6 +86,14 @@
       "Quale progetto vuoi realizzare?",
       "Come posso aiutarti oggi?"
     ]
+  },
+  "threads": {
+    "label": "Thread",
+    "moreActions": "Altre azioni",
+    "newTitlePrompt": "Nuovo titolo:",
+    "rename": "Rinomina",
+    "delete": "Elimina",
+    "noConversations": "Nessuna conversazione ancora"
   },
   "auth": {
     "welcome": "Benvenuto",

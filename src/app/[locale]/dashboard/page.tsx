@@ -20,8 +20,8 @@ function DashboardContent() {
   const locale = params.locale as string
 
   const handleSubmit = async (message: string, options?: { model_name?: string; agent_id?: string }) => {
-    // Genera un ID univoco per il nuovo thread
-    const threadId = Date.now().toString()
+    // Genera un UUID valido per il nuovo thread
+    const threadId = crypto.randomUUID()
     
     try {
       // Crea un nuovo thread con il primo messaggio

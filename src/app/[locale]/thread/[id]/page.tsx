@@ -42,29 +42,84 @@ function ThreadContent() {
   const [threadData, setThreadData] = useState<ThreadData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Simula il caricamento dei dati del thread
+  // Carica i dati del thread da Supabase
   useEffect(() => {
     const loadThreadData = async () => {
       setIsLoading(true)
       
-      // Qui dovresti fare una chiamata API per caricare i dati del thread
-      // Per ora uso dati mock
-      const mockThreadData: ThreadData = {
-        id: threadId,
-        title: "Nuova conversazione",
-        messages: [],
-        agent: {
-          id: 'studio',
-          name: 'Studio'
-        },
-        model: {
-          id: 'openai/gpt-oss-20b:free',
-          name: 'GPT OSS 20B',
-          provider: 'OpenRouter'
+      try {
+        // Chiamata API per caricare i dati del thread
+        const response = await fetch(`/api/threads?id=${threadId}`)
+        
+        if (response.ok) {
+          const data = await response.json()
+          if (data.thread) {
+            // Converte le date string in oggetti Date
+            const threadWithDates = {
+              ...data.thread,
+              messages: data.thread.messages.map((msg: any) => ({
+                ...msg,
+                timestamp: new Date(msg.timestamp)
+              }))
+            }
+            setThreadData(threadWithDates)
+          } else {
+            // Thread non trovato, usa dati mock per un nuovo thread
+            const mockThreadData: ThreadData = {
+              id: threadId,
+              title: "Nuova conversazione",
+              messages: [],
+              agent: {
+                id: 'studio',
+                name: 'Studio'
+              },
+              model: {
+                id: 'openai/gpt-oss-20b:free',
+                name: 'GPT OSS 20B',
+                provider: 'OpenRouter'
+              }
+            }
+            setThreadData(mockThreadData)
+          }
+        } else {
+          console.error('Errore nel caricamento del thread')
+          // Fallback ai dati mock
+          const mockThreadData: ThreadData = {
+            id: threadId,
+            title: "Nuova conversazione",
+            messages: [],
+            agent: {
+              id: 'studio',
+              name: 'Studio'
+            },
+            model: {
+              id: 'openai/gpt-oss-20b:free',
+              name: 'GPT OSS 20B',
+              provider: 'OpenRouter'
+            }
+          }
+          setThreadData(mockThreadData)
         }
+      } catch (error) {
+        console.error('Errore nel caricamento del thread:', error)
+        // Fallback ai dati mock
+        const mockThreadData: ThreadData = {
+          id: threadId,
+          title: "Nuova conversazione",
+          messages: [],
+          agent: {
+            id: 'studio',
+            name: 'Studio'
+          },
+          model: {
+            id: 'openai/gpt-oss-20b:free',
+            name: 'GPT OSS 20B',
+            provider: 'OpenRouter'
+          }
+        }
+        setThreadData(mockThreadData)
       }
       
-      setThreadData(mockThreadData)
       setIsLoading(false)
     }
 
@@ -90,6 +145,17 @@ function ThreadContent() {
     } : null)
 
     try {
+      // Salva il messaggio dell'utente nel database
+      await fetch('/api/threads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          threadId: threadData.id,
+          role: 'user',
+          content: message
+        })
+      })
+
       // Chiamata API per ottenere la risposta dell'assistente
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -136,6 +202,19 @@ function ThreadContent() {
               )
             } : null)
           }
+
+          // Salva il messaggio completo dell'assistente nel database
+          if (assistantMessage.content) {
+            await fetch('/api/threads', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                threadId: threadData.id,
+                role: 'assistant',
+                content: assistantMessage.content
+              })
+            })
+          }
         }
       }
     } catch (error) {
@@ -148,8 +227,25 @@ function ThreadContent() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset className="bg-sidebar">
-          <div className="h-screen flex items-center justify-center">
-            <div className="text-muted-foreground">Caricamento...</div>
+          <div className="h-screen flex flex-col">
+            {/* Thread Header Skeleton */}
+            <ThreadHeader 
+              title=""
+              isLoading={true}
+            />
+            
+            {/* Chat Area Skeleton */}
+            <div className="flex-1 overflow-hidden">
+              <ChatArea messages={[]} isPageLoading={true} />
+            </div>
+            
+            {/* Chat Input Skeleton */}
+            <div className="p-4">
+              <ChatInput 
+                onSubmit={() => {}}
+                isLoading={true}
+              />
+            </div>
           </div>
         </SidebarInset>
       </SidebarProvider>

@@ -81,6 +81,14 @@
       "How can I help you today?"
     ]
   },
+  "threads": {
+    "label": "Threads",
+    "moreActions": "More actions",
+    "newTitlePrompt": "New title:",
+    "rename": "Rename",
+    "delete": "Delete",
+    "noConversations": "No conversations yet"
+  },
   "auth": {
     "welcome": "Welcome",
     "signInDescription": "Sign in to your account or create a new one",

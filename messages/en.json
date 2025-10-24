@@ -134,6 +134,10 @@
   },
   "chat": {
     "typing": "Typing...",
+    "thinking": "Thinking...",
+    "searching": "Searching...",
+    "analyzing": "Analyzing...",
+    "processing": "Processing...",
     "emptyState": {
       "title": "Start a new conversation",
       "description": "Write a message below to start chatting with Studio."

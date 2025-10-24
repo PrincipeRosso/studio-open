@@ -114,12 +114,8 @@ export class ThreadService {
         return null
       }
 
-      // Parse parts and metadata from JSON strings
-      const parsedMessages = (messages || []).map(msg => ({
-        ...msg,
-        parts: msg.parts ? JSON.parse(msg.parts) : null,
-        metadata: msg.metadata ? JSON.parse(msg.metadata) : null
-      }))
+      // I dati JSONB vengono già parsati automaticamente da Supabase
+      const parsedMessages = messages || []
 
       return {
         ...thread,

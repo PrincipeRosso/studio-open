@@ -50,12 +50,29 @@ function ThreadContent() {
           const data = await response.json();
           
           if (data.thread && data.thread.messages) {
-            const uiMessages = data.thread.messages.map((msg: any) => ({
-              id: msg.id,
-              role: msg.role,
-              parts: msg.parts || [{ type: 'text', text: msg.content }],
-              createdAt: new Date(msg.timestamp)
-            }));
+            const uiMessages = data.thread.messages.map((msg: any) => {
+              // Se il messaggio ha parts, usali direttamente
+              if (msg.parts && Array.isArray(msg.parts)) {
+                return {
+                  id: msg.id,
+                  role: msg.role,
+                  content: msg.content,
+                  parts: msg.parts,
+                  metadata: msg.metadata,
+                  timestamp: new Date(msg.timestamp)
+                };
+              }
+              
+              // Altrimenti, crea un part di testo semplice
+              return {
+                id: msg.id,
+                role: msg.role,
+                content: msg.content,
+                parts: [{ type: 'text', text: msg.content }],
+                metadata: msg.metadata,
+                timestamp: new Date(msg.timestamp)
+              };
+            });
             setMessages(uiMessages);
           } else {
             setMessages([]);

@@ -23,6 +23,7 @@ interface Message {
     input?: any
     output?: any
   }>
+  metadata?: any
 }
 
 interface ChatAreaProps {
@@ -418,21 +419,33 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
 
 const TypingIndicator: React.FC = () => {
   const tChat = useTranslations('chat')
+  const [currentTextIndex, setCurrentTextIndex] = React.useState(0)
+  
+  const typingTexts = [
+    tChat('typing'),
+    tChat('thinking'),
+    tChat('searching'),
+    tChat('analyzing'),
+    tChat('processing')
+  ]
+  
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTextIndex((prevIndex) => (prevIndex + 1) % typingTexts.length)
+    }, 2000) // Cambia testo ogni 2 secondi
+    
+    return () => clearInterval(interval)
+  }, [typingTexts.length])
   
   return (
     <div className="flex gap-3 p-4">
       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
         <StudioIcon size={16} />
       </div>
-      <div className="bg-muted text-muted-foreground rounded-2xl px-4 py-3">
-        <div className="flex items-center gap-1">
-          <div className="flex gap-1">
-            <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-          </div>
-          <span className="text-xs ml-2 opacity-70">{tChat('typing')}</span>
-        </div>
+      <div className="flex items-center">
+        <span className="text-sm text-muted-foreground shimmer-text">
+          {typingTexts[currentTextIndex]}
+        </span>
       </div>
     </div>
   )
@@ -466,6 +479,16 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, isLoading = false,
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
     }
   }, [messages, isLoading])
+
+  // Check if there are active tool calls (input-streaming or input-available states)
+  const hasActiveToolCalls = messages.some(message => 
+    message.parts?.some(part => 
+      part.state === 'input-streaming' || part.state === 'input-available'
+    )
+  )
+
+  // Only show typing indicator if loading and no active tool calls
+  const shouldShowTypingIndicator = isLoading && !hasActiveToolCalls
 
   // Skeleton per lo stato di caricamento della pagina
   if (isPageLoading) {
@@ -517,8 +540,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, isLoading = false,
             <MessageBubble key={message.id} message={message} />
           ))}
           
-          {/* Typing Indicator */}
-          {isLoading && <TypingIndicator />}
+          {/* Typing Indicator - Only show when no active tool calls */}
+          {shouldShowTypingIndicator && <TypingIndicator />}
         </div>
         
         {/* Scroll anchor */}

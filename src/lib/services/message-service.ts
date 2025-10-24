@@ -70,8 +70,8 @@ export class MessageService {
         thread_id: threadId,
         role,
         content,
-        parts: parts ? JSON.stringify(parts) : null,
-        metadata: metadata ? JSON.stringify(metadata) : null
+        parts: parts || null,  // Salva direttamente come JSONB, non come stringa
+        metadata: metadata || null  // Salva direttamente come JSONB, non come stringa
       }
 
       const { data, error } = await client
@@ -108,12 +108,8 @@ export class MessageService {
         return []
       }
 
-      // Parse parts and metadata from JSON strings
-      return (data || []).map(message => ({
-        ...message,
-        parts: message.parts ? JSON.parse(message.parts) : null,
-        metadata: message.metadata ? JSON.parse(message.metadata) : null
-      }))
+      // I dati JSONB vengono già parsati automaticamente da Supabase
+      return data || []
     } catch (error) {
       console.error('Error getting thread messages with parts:', error)
       return []

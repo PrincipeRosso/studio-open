@@ -140,6 +140,10 @@
   },
   "chat": {
     "typing": "Sta scrivendo...",
+    "thinking": "Sta pensando...",
+    "searching": "Sta cercando...",
+    "analyzing": "Sta analizzando...",
+    "processing": "Sta elaborando...",
     "emptyState": {
       "title": "Inizia una nuova conversazione",
       "description": "Scrivi un messaggio qui sotto per iniziare a chattare con Studio."

@@ -148,6 +148,57 @@
     font-feature-settings: 'palt'; /* Adjusts spacing for CJK text */
   }
 
+  /* Shimmer effect for typing indicator - FIXED VISIBILITY */
+  .shimmer-text {
+    position: relative;
+    color: hsl(var(--foreground));
+    font-weight: 500;
+    opacity: 0.9;
+    animation: pulse-subtle 3s ease-in-out infinite;
+  }
+
+  .shimmer-text::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--primary) / 0.3) 25%,
+      hsl(var(--primary) / 0.6) 50%,
+      hsl(var(--primary) / 0.3) 75%,
+      transparent 100%
+    );
+    background-size: 300% 100%;
+    animation: shimmer-overlay 2.5s ease-in-out infinite;
+    pointer-events: none;
+    border-radius: 2px;
+  }
+
+  @keyframes shimmer-overlay {
+    0% {
+      background-position: -300% 0;
+    }
+    50% {
+      background-position: 0% 0;
+    }
+    100% {
+      background-position: 300% 0;
+    }
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 0.9;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
   /* Add font fallbacks for CJK characters */
   .cjk-text,
   .prose p,

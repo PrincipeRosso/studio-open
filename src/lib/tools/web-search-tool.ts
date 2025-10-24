@@ -43,8 +43,8 @@ export const webSearchTool = tool({
 
       const userLanguage = detectLanguage(query);
       const languageInstruction = userLanguage === 'italiano' 
-        ? 'Rispondi sempre in italiano e fornisci un riassunto COMPLETO e DETTAGLIATO in italiano di almeno 3-4 paragrafi con informazioni approfondite, dettagli specifici, statistiche, date, nomi e contesto completo. Struttura la risposta con: Introduzione, Sviluppo dettagliato, Conclusioni.'
-        : 'Respond in English and provide a COMPLETE and DETAILED summary in English of at least 3-4 paragraphs with in-depth information, specific details, statistics, dates, names and complete context. Structure the response with: Introduction, Detailed Development, Conclusions.';
+        ? 'Rispondi sempre in italiano. DOPO aver usato questo tool, sii CONCISO e diretto nella risposta. Evita ripetizioni eccessive, concentrati sui punti chiave e fornisci informazioni essenziali senza essere prolisso. Struttura la risposta in modo chiaro e organizzato.'
+        : 'Respond in English. AFTER using this tool, be CONCISE and direct in your response. Avoid excessive repetitions, focus on key points and provide essential information without being verbose. Structure the response in a clear and organized way.';
 
       // Ritorna un oggetto semplice con i risultati
       return {
@@ -119,8 +119,8 @@ export const newsSearchTool = tool({
 
       const userLanguage = detectLanguage(query);
       const languageInstruction = userLanguage === 'italiano' 
-        ? 'Rispondi sempre in italiano e fornisci un riassunto COMPLETO e DETTAGLIATO delle notizie in italiano di almeno 3-4 paragrafi con informazioni approfondite, dettagli specifici, statistiche, date, nomi e contesto completo. Struttura la risposta con: Introduzione, Sviluppo dettagliato, Conclusioni.'
-        : 'Respond in English and provide a COMPLETE and DETAILED summary of the news in English of at least 3-4 paragraphs with in-depth information, specific details, statistics, dates, names and complete context. Structure the response with: Introduction, Detailed Development, Conclusions.';
+        ? 'Rispondi sempre in italiano. DOPO aver usato questo tool, sii CONCISO e diretto nella risposta. Evita ripetizioni eccessive, concentrati sui punti chiave delle notizie e fornisci informazioni essenziali senza essere prolisso. Struttura la risposta in modo chiaro e organizzato.'
+        : 'Respond in English. AFTER using this tool, be CONCISE and direct in your response. Avoid excessive repetitions, focus on key points of the news and provide essential information without being verbose. Structure the response in a clear and organized way.';
 
       return {
         query: results.query,

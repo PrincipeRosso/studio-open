@@ -102,5 +102,41 @@
     "signingIn": "Signing in...",
     "signingUp": "Signing up...",
     "checkEmail": "Check your email to confirm your account"
+  },
+  "tools": {
+    "webSearch": {
+      "label": "Web Search",
+      "preparing": "Preparing query...",
+      "searching": "Searching",
+      "completed": "Search completed",
+      "error": "Search error",
+      "imagesFound": "Images found:",
+      "summary": "Summary:",
+      "sources": "Sources:",
+      "readMore": "Read more →"
+    },
+    "newsSearch": {
+      "label": "News Search",
+      "preparing": "Preparing query...",
+      "searching": "Searching",
+      "completed": "News found",
+      "error": "News search error",
+      "imagesFound": "Images from news:",
+      "summary": "Summary:",
+      "news": "News:",
+      "published": "Published:",
+      "readNews": "Read news →"
+    },
+    "generic": {
+      "tool": "Tool",
+      "unknownError": "Unknown error"
+    }
+  },
+  "chat": {
+    "typing": "Typing...",
+    "emptyState": {
+      "title": "Start a new conversation",
+      "description": "Write a message below to start chatting with Studio."
+    }
   }
 }

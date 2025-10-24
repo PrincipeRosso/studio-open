@@ -44,16 +44,83 @@ export class MessageService {
         .single()
 
       if (error) {
+        console.error('Error creating message:', error)
         return null
       }
 
       return data
     } catch (error) {
+      console.error('Error creating message:', error)
       return null
     }
   }
 
-  // Ottieni tutti i messaggi di un thread
+  // Crea un messaggio con parti (per tool calls)
+  async createMessageWithParts(
+    threadId: string,
+    role: 'user' | 'assistant',
+    content: string,
+    parts?: any[],
+    metadata?: any
+  ): Promise<Message | null> {
+    try {
+      const client = this.supabase || await this.initServerClient()
+      
+      const messageData = {
+        thread_id: threadId,
+        role,
+        content,
+        parts: parts ? JSON.stringify(parts) : null,
+        metadata: metadata ? JSON.stringify(metadata) : null
+      }
+
+      const { data, error } = await client
+        .from('messages')
+        .insert(messageData)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating message with parts:', error)
+        return null
+      }
+
+      return data
+    } catch (error) {
+      console.error('Error creating message with parts:', error)
+      return null
+    }
+  }
+
+  // Ottieni tutti i messaggi di un thread con parti
+  async getThreadMessagesWithParts(threadId: string): Promise<any[]> {
+    try {
+      const client = this.supabase || await this.initServerClient()
+      
+      const { data, error } = await client
+        .from('messages')
+        .select('*')
+        .eq('thread_id', threadId)
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        console.error('Error getting thread messages with parts:', error)
+        return []
+      }
+
+      // Parse parts and metadata from JSON strings
+      return (data || []).map(message => ({
+        ...message,
+        parts: message.parts ? JSON.parse(message.parts) : null,
+        metadata: message.metadata ? JSON.parse(message.metadata) : null
+      }))
+    } catch (error) {
+      console.error('Error getting thread messages with parts:', error)
+      return []
+    }
+  }
+
+  // Ottieni tutti i messaggi di un thread (metodo originale per compatibilità)
   async getThreadMessages(threadId: string): Promise<Message[]> {
     try {
       const client = this.supabase || await this.initServerClient()

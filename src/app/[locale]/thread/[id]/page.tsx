@@ -1,7 +1,6 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { AppSidebar } from '@/components/app-sidebar';
@@ -29,17 +28,16 @@ function ThreadContent() {
     error
   } = useChat({
     id: threadId,
-    transport: new DefaultChatTransport({
-      api: '/api/chat',
-      prepareSendMessagesRequest({ messages, id }) {
-        return {
-          body: {
-            messages,
-            threadId: id,
-          }
-        };
-      },
-    }),
+    api: '/api/chat',
+    body: {
+      threadId: threadId,
+    },
+    onFinish: (message) => {
+      console.log('Messaggio completato:', message);
+    },
+    onError: (error) => {
+      console.error('Errore nella chat:', error);
+    },
   });
 
   // Carica i messaggi esistenti per questo thread
@@ -55,7 +53,7 @@ function ThreadContent() {
             const uiMessages = data.thread.messages.map((msg: any) => ({
               id: msg.id,
               role: msg.role,
-              parts: [{ type: 'text', text: msg.content }],
+              parts: msg.parts || [{ type: 'text', text: msg.content }],
               createdAt: new Date(msg.timestamp)
             }));
             setMessages(uiMessages);
@@ -140,7 +138,8 @@ function ThreadContent() {
                   .filter(part => part.type === 'text')
                   .map(part => part.text)
                   .join(''),
-                timestamp: new Date()
+                timestamp: new Date(),
+                parts: msg.parts
               }))}
               isLoading={status === 'streaming' || status === 'submitted'}
               isPageLoading={messagesLoading}

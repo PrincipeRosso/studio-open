@@ -167,6 +167,8 @@ export async function GET(req: NextRequest) {
           id: msg.id,
           role: msg.role,
           content: msg.content,
+          parts: msg.parts,
+          metadata: msg.metadata,
           timestamp: msg.created_at
         })) || [],
         agent: {

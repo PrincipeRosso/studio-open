@@ -108,5 +108,41 @@
     "signingIn": "Accesso in corso...",
     "signingUp": "Registrazione in corso...",
     "checkEmail": "Controlla la tua email per confermare l'account"
+  },
+  "tools": {
+    "webSearch": {
+      "label": "Ricerca web",
+      "preparing": "Preparazione query...",
+      "searching": "Cercando",
+      "completed": "Ricerca completata",
+      "error": "Errore ricerca",
+      "imagesFound": "Immagini trovate:",
+      "summary": "Riassunto:",
+      "sources": "Fonti:",
+      "readMore": "Leggi di più →"
+    },
+    "newsSearch": {
+      "label": "Ricerca notizie",
+      "preparing": "Preparazione query...",
+      "searching": "Cercando",
+      "completed": "Notizie trovate",
+      "error": "Errore ricerca notizie",
+      "imagesFound": "Immagini dalle notizie:",
+      "summary": "Riassunto:",
+      "news": "Notizie:",
+      "published": "Pubblicato:",
+      "readNews": "Leggi notizia →"
+    },
+    "generic": {
+      "tool": "Strumento",
+      "unknownError": "Errore sconosciuto"
+    }
+  },
+  "chat": {
+    "typing": "Sta scrivendo...",
+    "emptyState": {
+      "title": "Inizia una nuova conversazione",
+      "description": "Scrivi un messaggio qui sotto per iniziare a chattare con Studio."
+    }
   }
 }

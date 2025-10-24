@@ -2,14 +2,27 @@
 
 import React, { useEffect, useRef } from 'react'
 import { StudioIcon } from '@/components/studio-icon'
-import { User } from 'lucide-react'
+import { User, Search, Newspaper, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  parts?: Array<{
+    type: string
+    text?: string
+    toolCallId?: string
+    toolName?: string
+    args?: any
+    result?: any
+    state?: 'input-streaming' | 'input-available' | 'output-available' | 'output-error'
+    errorText?: string
+    input?: any
+    output?: any
+  }>
 }
 
 interface ChatAreaProps {
@@ -18,8 +31,118 @@ interface ChatAreaProps {
   isPageLoading?: boolean
 }
 
+const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName, args }) => {
+  const getToolIcon = (toolName: string) => {
+    switch (toolName) {
+      case 'webSearch':
+        return <Search className="h-4 w-4" />
+      case 'newsSearch':
+        return <Newspaper className="h-4 w-4" />
+      default:
+        return <Loader2 className="h-4 w-4 animate-spin" />
+    }
+  }
+
+  const getToolLabel = (toolName: string) => {
+    switch (toolName) {
+      case 'webSearch':
+        return 'Ricerca web'
+      case 'newsSearch':
+        return 'Ricerca notizie'
+      default:
+        return 'Strumento'
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
+      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+        {getToolIcon(toolName)}
+      </div>
+      <div className="flex-1">
+        <div className="text-sm font-medium text-foreground">
+          {getToolLabel(toolName)}
+        </div>
+        <div className="text-xs text-muted-foreground">
+          {args?.query || 'Esecuzione in corso...'}
+        </div>
+      </div>
+      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+    </div>
+  )
+}
+
+const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, result }) => {
+  const getToolIcon = (toolName: string) => {
+    switch (toolName) {
+      case 'webSearch':
+        return <Search className="h-4 w-4" />
+      case 'newsSearch':
+        return <Newspaper className="h-4 w-4" />
+      default:
+        return <Loader2 className="h-4 w-4" />
+    }
+  }
+
+  const getToolLabel = (toolName: string) => {
+    switch (toolName) {
+      case 'webSearch':
+        return 'Risultati ricerca web'
+      case 'newsSearch':
+        return 'Risultati notizie'
+      default:
+        return 'Risultato strumento'
+    }
+  }
+
+  if (!result?.success) {
+    return (
+      <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center">
+          {getToolIcon(toolName)}
+        </div>
+        <div className="text-sm text-destructive">
+          Errore: {result?.error || 'Errore sconosciuto'}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-3 bg-muted/30 rounded-lg border border-border/30">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+          {getToolIcon(toolName)}
+        </div>
+        <div className="text-sm font-medium text-foreground">
+          {getToolLabel(toolName)}
+        </div>
+      </div>
+      
+      {result.data?.answer && (
+        <div className="text-sm text-foreground mb-2 p-2 bg-background rounded border">
+          {result.data.answer}
+        </div>
+      )}
+      
+      {result.data?.sources && result.data.sources.length > 0 && (
+        <div className="space-y-1">
+          <div className="text-xs font-medium text-muted-foreground">Fonti:</div>
+          {result.data.sources.slice(0, 3).map((source: any, index: number) => (
+            <div key={index} className="text-xs text-muted-foreground">
+              • {source.title}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const isUser = message.role === 'user'
+  const t = useTranslations('tools')
+  const tChat = useTranslations('chat')
   
   return (
     <div className={cn(
@@ -47,20 +170,255 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
       
       {/* Contenuto del messaggio */}
       <div className={cn(
-        "w-full px-4 py-4",
+        "w-full space-y-2",
         isUser 
-          ? "bg-card text-foreground rounded-3xl border border-border shadow-sm" 
+          ? "bg-card text-foreground rounded-3xl border border-border shadow-sm px-4 py-4" 
           : "text-foreground"
       )}>
-        <div className="text-base leading-relaxed whitespace-pre-wrap">
-          {message.content}
-        </div>
+        {/* Contenuto testuale */}
+        {message.content && (
+          <div className="text-base leading-relaxed whitespace-pre-wrap">
+            {message.content}
+          </div>
+        )}
+        
+        {/* Tool calls e risultati */}
+        {message.parts && message.parts.length > 0 && (
+          <div className="space-y-2">
+            {message.parts.map((part, index) => {
+              // Tool calls per webSearch
+              if (part.type === 'tool-webSearch') {
+                switch (part.state) {
+                  case 'input-streaming':
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Search className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-foreground">{t('webSearch.label')}</div>
+                          <div className="text-xs text-muted-foreground">{t('webSearch.preparing')}</div>
+                        </div>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    );
+                  case 'input-available':
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Search className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-foreground">{t('webSearch.label')}</div>
+                          <div className="text-xs text-muted-foreground">{t('webSearch.searching')}: {part.input?.query || '...'}</div>
+                        </div>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    );
+                  case 'output-available':
+                    return (
+                      <div key={index} className="p-3 bg-muted/30 rounded-lg border border-border/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Search className="h-4 w-4" />
+                          </div>
+                          <div className="text-sm font-medium text-foreground">{t('webSearch.completed')}</div>
+                        </div>
+                        
+                        {/* Card Immagini Separate - SOPRA il summary */}
+                        {part.output?.sources && part.output.sources.some((s: any) => s.images && s.images.length > 0) && (
+                          <div className="mb-3">
+                            <div className="text-xs font-medium text-muted-foreground mb-2">{t('webSearch.imagesFound')}</div>
+                            <div className="grid grid-cols-2 gap-2">
+                              {part.output.sources
+                                .filter((source: any) => source.images && source.images.length > 0)
+                                .flatMap((source: any) => source.images.slice(0, 1).map((img: string) => ({ img, source })))
+                                .slice(0, 4)
+                                .map((item: any, idx: number) => (
+                                  <div key={idx} className="border rounded overflow-hidden bg-background">
+                                    <img 
+                                      src={item.img} 
+                                      alt={`Immagine da ${item.source.title}`}
+                                      className="w-full h-32 object-cover"
+                                      onError={(e) => {
+                                        e.currentTarget.parentElement!.style.display = 'none';
+                                      }}
+                                    />
+                                    <div className="p-2">
+                                      <div className="text-xs text-muted-foreground line-clamp-2">{item.source.title}</div>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Summary - TRA immagini e fonti */}
+                        {part.output?.answer && (
+                          <div className="text-sm text-foreground mb-3 p-3 bg-background rounded border border-border/50">
+                            <div className="font-medium text-foreground mb-2">{t('webSearch.summary')}</div>
+                            <div className="leading-relaxed">{part.output.answer}</div>
+                          </div>
+                        )}
+                        
+                        {/* Card Fonti */}
+                        {part.output?.sources && part.output.sources.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium text-muted-foreground">{t('webSearch.sources')}</div>
+                            {part.output.sources.slice(0, 5).map((source: any, idx: number) => (
+                              <div key={idx} className="text-xs border rounded p-2 bg-background/50">
+                                <div className="font-medium text-foreground mb-1">{source.title}</div>
+                                <div className="text-muted-foreground mb-1">{source.content}</div>
+                                <div className="text-xs text-blue-600 hover:text-blue-800">
+                                  <a href={source.url} target="_blank" rel="noopener noreferrer">
+                                    {t('webSearch.readMore')}
+                                  </a>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  case 'output-error':
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center">
+                          <Search className="h-4 w-4" />
+                        </div>
+                            <div className="text-sm text-destructive">
+                              {t('webSearch.error')}: {part.errorText || t('generic.unknownError')}
+                            </div>
+                      </div>
+                    );
+                }
+              }
+
+              // Tool calls per newsSearch
+              if (part.type === 'tool-newsSearch') {
+                switch (part.state) {
+                  case 'input-streaming':
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Newspaper className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-foreground">{t('newsSearch.label')}</div>
+                          <div className="text-xs text-muted-foreground">{t('newsSearch.preparing')}</div>
+                        </div>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    );
+                  case 'input-available':
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Newspaper className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-foreground">{t('newsSearch.label')}</div>
+                          <div className="text-xs text-muted-foreground">{t('newsSearch.searching')}: {part.input?.query || '...'}</div>
+                        </div>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    );
+                  case 'output-available':
+                    return (
+                      <div key={index} className="p-3 bg-muted/30 rounded-lg border border-border/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Newspaper className="h-4 w-4" />
+                          </div>
+                          <div className="text-sm font-medium text-foreground">{t('newsSearch.completed')}</div>
+                        </div>
+                        
+                        {/* Card Immagini Notizie Separate - SOPRA il summary */}
+                        {part.output?.news && part.output.news.some((n: any) => n.images && n.images.length > 0) && (
+                          <div className="mb-3">
+                            <div className="text-xs font-medium text-muted-foreground mb-2">{t('newsSearch.imagesFound')}</div>
+                            <div className="grid grid-cols-2 gap-2">
+                              {part.output.news
+                                .filter((news: any) => news.images && news.images.length > 0)
+                                .flatMap((news: any) => news.images.slice(0, 1).map((img: string) => ({ img, news })))
+                                .slice(0, 4)
+                                .map((item: any, idx: number) => (
+                                  <div key={idx} className="border rounded overflow-hidden bg-background">
+                                    <img 
+                                      src={item.img} 
+                                      alt={`Immagine da ${item.news.title}`}
+                                      className="w-full h-32 object-cover"
+                                      onError={(e) => {
+                                        e.currentTarget.parentElement!.style.display = 'none';
+                                      }}
+                                    />
+                                    <div className="p-2">
+                                      <div className="text-xs text-muted-foreground line-clamp-2">{item.news.title}</div>
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Summary - TRA immagini e notizie */}
+                        {part.output?.answer && (
+                          <div className="text-sm text-foreground mb-3 p-3 bg-background rounded border border-border/50">
+                            <div className="font-medium text-foreground mb-2">{t('newsSearch.summary')}</div>
+                            <div className="leading-relaxed">{part.output.answer}</div>
+                          </div>
+                        )}
+                        
+                        {/* Card Notizie */}
+                        {part.output?.news && part.output.news.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="text-xs font-medium text-muted-foreground">{t('newsSearch.news')}</div>
+                            {part.output.news.slice(0, 5).map((news: any, idx: number) => (
+                              <div key={idx} className="text-xs border rounded p-2 bg-background/50">
+                                <div className="font-medium text-foreground mb-1">{news.title}</div>
+                                <div className="text-muted-foreground mb-1">{news.content}</div>
+                                {news.publishedDate && (
+                                  <div className="text-xs text-muted-foreground mb-1">
+                                    {t('newsSearch.published')} {new Date(news.publishedDate).toLocaleDateString('it-IT')}
+                                  </div>
+                                )}
+                                <div className="text-xs text-blue-600 hover:text-blue-800">
+                                  <a href={news.url} target="_blank" rel="noopener noreferrer">
+                                    {t('newsSearch.readNews')}
+                                  </a>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  case 'output-error':
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center">
+                          <Newspaper className="h-4 w-4" />
+                        </div>
+                        <div className="text-sm text-destructive">
+                          {t('newsSearch.error')}: {part.errorText || t('generic.unknownError')}
+                        </div>
+                      </div>
+                    );
+                }
+              }
+
+              return null;
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
 const TypingIndicator: React.FC = () => {
+  const tChat = useTranslations('chat')
+  
   return (
     <div className="flex gap-3 p-4">
       <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -73,7 +431,7 @@ const TypingIndicator: React.FC = () => {
             <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
             <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
-          <span className="text-xs ml-2 opacity-70">Sta scrivendo...</span>
+          <span className="text-xs ml-2 opacity-70">{tChat('typing')}</span>
         </div>
       </div>
     </div>
@@ -81,15 +439,17 @@ const TypingIndicator: React.FC = () => {
 }
 
 const EmptyState: React.FC = () => {
+  const tChat = useTranslations('chat')
+  
   return (
     <div className="flex-1 flex items-center justify-center p-8">
       <div className="text-center max-w-md mx-auto w-full max-w-2xl">
         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
           <StudioIcon size={24} />
         </div>
-        <h3 className="text-lg mb-2">Inizia una nuova conversazione</h3>
+        <h3 className="text-lg mb-2">{tChat('emptyState.title')}</h3>
         <p className="text-muted-foreground text-sm">
-          Scrivi un messaggio qui sotto per iniziare a chattare con Studio.
+          {tChat('emptyState.description')}
         </p>
       </div>
     </div>

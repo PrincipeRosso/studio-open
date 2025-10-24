@@ -10,6 +10,8 @@ export interface ThreadWithMessages extends Thread {
     id: string
     role: 'user' | 'assistant'
     content: string
+    parts?: any
+    metadata?: any
     created_at: string
   }>
 }
@@ -104,7 +106,7 @@ export class ThreadService {
 
       const { data: messages, error: messagesError } = await client
         .from('messages')
-        .select('id, role, content, created_at')
+        .select('id, role, content, parts, metadata, created_at')
         .eq('thread_id', threadId)
         .order('created_at', { ascending: true })
 
@@ -112,9 +114,16 @@ export class ThreadService {
         return null
       }
 
+      // Parse parts and metadata from JSON strings
+      const parsedMessages = (messages || []).map(msg => ({
+        ...msg,
+        parts: msg.parts ? JSON.parse(msg.parts) : null,
+        metadata: msg.metadata ? JSON.parse(msg.metadata) : null
+      }))
+
       return {
         ...thread,
-        messages: messages || []
+        messages: parsedMessages
       } as ThreadWithMessages
     } catch (error) {
       return null

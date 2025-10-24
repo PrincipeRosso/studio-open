@@ -1,269 +1,120 @@
-"use client"
+'use client';
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { AuthProvider, useAuth } from "@/contexts/auth-context"
-import { ChatInput } from "@/components/thread/chat-input/chat-input"
-import { ThreadHeader } from "@/components/thread/thread-header"
-import { ChatArea } from "@/components/thread/chat-area"
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { AppSidebar } from '@/components/app-sidebar';
+import { AuthProvider } from '@/contexts/auth-context';
+import { ChatArea } from '@/components/thread/chat-area';
+import { ChatInput } from '@/components/thread/chat-input/chat-input';
+import { ChatInputSkeleton } from '@/components/thread/chat-input/chat-input-skeleton';
+import { ThreadHeader } from '@/components/thread/thread-header';
+import { ThreadHeaderSkeleton } from '@/components/thread/thread-header-skeleton';
 import {
   SidebarInset,
   SidebarProvider,
-} from "@/components/ui/sidebar"
-import { useParams } from "next/navigation"
-import { useState, useEffect } from "react"
-
-interface Message {
-  id: string
-  role: 'user' | 'assistant'
-  content: string
-  timestamp: Date
-}
-
-interface ThreadData {
-  id: string
-  title: string
-  messages: Message[]
-  agent: {
-    id: string
-    name: string
-  }
-  model: {
-    id: string
-    name: string
-    provider: string
-  }
-}
+} from '@/components/ui/sidebar';
 
 function ThreadContent() {
-  const { user } = useAuth()
-  const params = useParams()
-  const threadId = params.id as string
-  
-  const [threadData, setThreadData] = useState<ThreadData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const params = useParams();
+  const threadId = params.id as string;
+  const [messagesLoading, setMessagesLoading] = useState(true);
 
-  // Carica i dati del thread da Supabase
+  const {
+    messages,
+    sendMessage,
+    setMessages,
+    status,
+    error
+  } = useChat({
+    id: threadId,
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+      prepareSendMessagesRequest({ messages, id }) {
+        return {
+          body: {
+            messages,
+            threadId: id,
+          }
+        };
+      },
+    }),
+  });
+
+  // Carica i messaggi esistenti per questo thread
   useEffect(() => {
-    const loadThreadData = async () => {
-      setIsLoading(true)
-      
+    const loadMessages = async () => {
       try {
-        // Chiamata API per caricare i dati del thread
-        const response = await fetch(`/api/threads?id=${threadId}`)
+        const response = await fetch(`/api/threads?id=${threadId}`);
         
         if (response.ok) {
-          const data = await response.json()
-          if (data.thread) {
-            // Converte le date string in oggetti Date
-            const threadWithDates = {
-              ...data.thread,
-              messages: data.thread.messages.map((msg: any) => ({
-                ...msg,
-                timestamp: new Date(msg.timestamp)
-              }))
-            }
-            setThreadData(threadWithDates)
+          const data = await response.json();
+          
+          if (data.thread && data.thread.messages) {
+            const uiMessages = data.thread.messages.map((msg: any) => ({
+              id: msg.id,
+              role: msg.role,
+              parts: [{ type: 'text', text: msg.content }],
+              createdAt: new Date(msg.timestamp)
+            }));
+            setMessages(uiMessages);
           } else {
-            // Thread non trovato, usa dati mock per un nuovo thread
-            const mockThreadData: ThreadData = {
-              id: threadId,
-              title: "Nuova conversazione",
-              messages: [],
-              agent: {
-                id: 'studio',
-                name: 'Studio'
-              },
-              model: {
-                id: 'openai/gpt-oss-20b:free',
-                name: 'GPT OSS 20B',
-                provider: 'OpenRouter'
-              }
-            }
-            setThreadData(mockThreadData)
+            setMessages([]);
           }
         } else {
-          console.error('Errore nel caricamento del thread')
-          // Fallback ai dati mock
-          const mockThreadData: ThreadData = {
-            id: threadId,
-            title: "Nuova conversazione",
-            messages: [],
-            agent: {
-              id: 'studio',
-              name: 'Studio'
-            },
-            model: {
-              id: 'openai/gpt-oss-20b:free',
-              name: 'GPT OSS 20B',
-              provider: 'OpenRouter'
-            }
-          }
-          setThreadData(mockThreadData)
+          setMessages([]);
         }
       } catch (error) {
-        console.error('Errore nel caricamento del thread:', error)
-        // Fallback ai dati mock
-        const mockThreadData: ThreadData = {
-          id: threadId,
-          title: "Nuova conversazione",
-          messages: [],
-          agent: {
-            id: 'studio',
-            name: 'Studio'
-          },
-          model: {
-            id: 'openai/gpt-oss-20b:free',
-            name: 'GPT OSS 20B',
-            provider: 'OpenRouter'
-          }
-        }
-        setThreadData(mockThreadData)
+        console.error('Error loading messages:', error);
+        setMessages([]);
+      } finally {
+        setMessagesLoading(false);
       }
-      
-      setIsLoading(false)
-    }
+    };
 
-    if (threadId) {
-      loadThreadData()
-    }
-  }, [threadId])
+    loadMessages();
+  }, [threadId, setMessages]);
 
-  const handleSubmit = async (message: string, options?: { model_name?: string; agent_id?: string }) => {
-    if (!threadData) return
-
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: message,
-      timestamp: new Date()
-    }
-
-    // Aggiungi il messaggio dell'utente
-    setThreadData(prev => prev ? {
-      ...prev,
-      messages: [...prev.messages, newMessage]
-    } : null)
-
+  const handleSendMessage = async (content: string, options?: { agent_id?: string; model_name?: string }) => {
     try {
-      // Salva il messaggio dell'utente nel database
-      await fetch('/api/threads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          threadId: threadData.id,
-          role: 'user',
-          content: message
-        })
-      })
-
-      // Chiamata API per ottenere la risposta dell'assistente
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [...(threadData.messages || []), newMessage].map(msg => ({
-            role: msg.role,
-            content: msg.content
-          })),
-          agent_id: options?.agent_id || threadData.agent.id,
-          model_name: options?.model_name || threadData.model.id
-        })
-      })
-
-      if (response.ok) {
-        const reader = response.body?.getReader()
-        if (reader) {
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: '',
-            timestamp: new Date()
-          }
-
-          // Aggiungi il messaggio dell'assistente (inizialmente vuoto)
-          setThreadData(prev => prev ? {
-            ...prev,
-            messages: [...prev.messages, assistantMessage]
-          } : null)
-
-          // Leggi lo stream della risposta
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-
-            const chunk = new TextDecoder().decode(value)
-            assistantMessage.content += chunk
-
-            // Aggiorna il messaggio dell'assistente
-            setThreadData(prev => prev ? {
-              ...prev,
-              messages: prev.messages.map(msg => 
-                msg.id === assistantMessage.id ? { ...assistantMessage } : msg
-              )
-            } : null)
-          }
-
-          // Salva il messaggio completo dell'assistente nel database
-          if (assistantMessage.content) {
-            await fetch('/api/threads', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                threadId: threadData.id,
-                role: 'assistant',
-                content: assistantMessage.content
-              })
-            })
-          }
+      // Use sendMessage from useChat
+      await sendMessage({
+        text: content
+      }, {
+        body: {
+          agent_id: options?.agent_id,
+          model_name: options?.model_name,
+          threadId
         }
-      }
+      });
     } catch (error) {
-      console.error('Errore nell\'invio del messaggio:', error)
+      console.error('Error sending message:', error);
     }
-  }
+  };
 
-  if (isLoading) {
-    return (
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset className="bg-sidebar">
-          <div className="h-screen flex flex-col">
-            {/* Thread Header Skeleton */}
-            <ThreadHeader 
-              title=""
-              isLoading={true}
-            />
-            
-            {/* Chat Area Skeleton */}
-            <div className="flex-1 overflow-hidden">
-              <ChatArea messages={[]} isPageLoading={true} />
-            </div>
-            
-            {/* Chat Input Skeleton */}
-            <div className="p-4">
-              <ChatInput 
-                onSubmit={() => {}}
-                isLoading={true}
-              />
-            </div>
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    )
-  }
 
-  if (!threadData) {
-    return (
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset className="bg-sidebar">
-          <div className="h-screen flex items-center justify-center">
-            <div className="text-muted-foreground">Thread non trovato</div>
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    )
-  }
+
+  const isLoading = status === 'submitted' || status === 'streaming';
+
+  // Determina il titolo del thread
+  const getThreadTitle = () => {
+    if (messages.length === 0) {
+      return "Nuova conversazione";
+    }
+    // Usa il primo messaggio dell'utente come titolo, troncato
+    const firstUserMessage = messages.find(msg => msg.role === 'user');
+    if (firstUserMessage) {
+      const content = firstUserMessage.parts
+        .filter(part => part.type === 'text')
+        .map(part => part.text)
+        .join('');
+      return content.length > 50 
+        ? content.substring(0, 50) + "..."
+        : content;
+    }
+    return "Conversazione";
+  };
 
   return (
     <SidebarProvider>
@@ -271,25 +122,56 @@ function ThreadContent() {
       <SidebarInset className="bg-sidebar">
         <div className="h-screen flex flex-col">
           {/* Thread Header */}
-          <ThreadHeader 
-            title={threadData.title}
-          />
+          {messagesLoading ? (
+            <ThreadHeaderSkeleton />
+          ) : (
+            <ThreadHeader 
+              title={getThreadTitle()}
+            />
+          )}
           
           {/* Chat Area */}
           <div className="flex-1 overflow-hidden">
-            <ChatArea messages={threadData.messages} />
+            <ChatArea 
+              messages={messages.map(msg => ({
+                id: msg.id,
+                role: msg.role as 'user' | 'assistant',
+                content: msg.parts
+                  .filter(part => part.type === 'text')
+                  .map(part => part.text)
+                  .join(''),
+                timestamp: new Date()
+              }))}
+              isLoading={status === 'streaming' || status === 'submitted'}
+              isPageLoading={messagesLoading}
+            />
           </div>
           
           {/* Chat Input */}
           <div className="p-4">
-            <ChatInput 
-              onSubmit={handleSubmit}
-            />
+            {messagesLoading ? (
+              <ChatInputSkeleton />
+            ) : (
+              <ChatInput 
+                onSubmit={handleSendMessage}
+                loading={status === 'streaming' || status === 'submitted'}
+                disabled={status === 'streaming' || status === 'submitted'}
+              />
+            )}
           </div>
+          
+          {/* Error Display */}
+          {error && (
+            <div className="p-4 bg-destructive/10 border-t border-destructive/20">
+              <div className="text-sm text-destructive">
+                Errore: {error.message}
+              </div>
+            </div>
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }
 
 export default function ThreadPage() {
@@ -297,5 +179,5 @@ export default function ThreadPage() {
     <AuthProvider>
       <ThreadContent />
     </AuthProvider>
-  )
+  );
 }

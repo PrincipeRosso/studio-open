@@ -1,22 +1,28 @@
-import { streamText } from 'ai';
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { streamText, convertToModelMessages } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { createServerMessageService } from '@/lib/services/message-service';
+import { createServerThreadService } from '@/lib/services/thread-service';
+import { createServerSupabaseClient } from '@/lib/supabase-server';
 
 export async function POST(req: Request) {
   try {
-    const { messages, agent_id, model_name } = await req.json();
+    const { messages, threadId, agent_id, model_name } = await req.json();
+
+    // Ottieni l'utente autenticato dalla sessione
+    const supabase = await createServerSupabaseClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return new Response('Utente non autenticato', { status: 401 });
+    }
+
+    // Inizializza i servizi
+    const messageService = createServerMessageService();
+    const threadService = createServerThreadService();
 
     // Usa il modello selezionato dall'utente o il default
-    const selectedModel = model_name || 'openai/gpt-oss-20b:free';
+    const selectedModel = model_name || 'gpt-4.1-mini';
     const selectedAgent = agent_id || 'studio';
-
-    // Configura OpenRouter come provider
-    const openrouter = createOpenAICompatible({
-      baseURL: 'https://openrouter.ai/api/v1',
-      name: 'openrouter',
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-      },
-    });
 
     // Personalizza il comportamento in base all'agente selezionato
     let systemMessage = '';
@@ -28,17 +34,74 @@ export async function POST(req: Request) {
         systemMessage = 'Sei un assistente AI utile e cordiale.';
     }
 
+    // Converti i UIMessage in ModelMessage per streamText
+    const modelMessages = convertToModelMessages(messages);
+
     // Aggiungi il messaggio di sistema se non è già presente
-    const messagesWithSystem = messages[0]?.role === 'system' 
-      ? messages 
-      : [{ role: 'system', content: systemMessage }, ...messages];
+    const messagesWithSystem = modelMessages[0]?.role === 'system' 
+      ? modelMessages 
+      : [{ role: 'system' as const, content: systemMessage }, ...modelMessages];
+
+    // Save user message to Supabase if threadId is provided
+    if (threadId && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'user') {
+        // Handle UIMessage structure from useChat
+        let content = '';
+        if (typeof lastMessage.content === 'string') {
+          content = lastMessage.content;
+        } else if (lastMessage.parts) {
+          // Extract text from parts array
+          content = lastMessage.parts
+            .filter((part: any) => part.type === 'text')
+            .map((part: any) => part.text)
+            .join('');
+        } else if (Array.isArray(lastMessage.content)) {
+          content = lastMessage.content.map((part: any) => part.text).join('');
+        }
+
+        await messageService.createMessage({
+          id: crypto.randomUUID(),
+          thread_id: threadId,
+          role: 'user',
+          content: content
+        });
+      }
+    }
 
     const result = await streamText({
-      model: openrouter(selectedModel),
+      model: openai(selectedModel),
       messages: messagesWithSystem,
     });
 
-    return result.toTextStreamResponse();
+    return result.toUIMessageStreamResponse({
+      onFinish: async ({ responseMessage }) => {
+        // Salva la risposta dell'assistente su Supabase
+        if (threadId && responseMessage) {
+          // Estrai il contenuto testuale dal messaggio
+          const textContent = responseMessage.parts
+            .filter(part => part.type === 'text')
+            .map(part => part.text)
+            .join('');
+          
+          // Genera un UUID valido se l'ID è vuoto
+          const messageId = responseMessage.id || crypto.randomUUID();
+          
+          if (textContent) {
+            try {
+              const savedMessage = await messageService.createMessage({
+                id: messageId,
+                thread_id: threadId,
+                role: 'assistant',
+                content: textContent
+              });
+            } catch (error) {
+              console.error('Errore nel salvataggio del messaggio:', error);
+            }
+          }
+        }
+      }
+    });
   } catch (error) {
     console.error('Errore nell\'API chat:', error);
     return new Response('Errore interno del server', { status: 500 });

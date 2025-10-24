@@ -123,9 +123,9 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ messages, isLoading = false,
                 <div className="w-full">
                   <div className="bg-muted rounded-3xl p-4 animate-pulse">
                     <div className="space-y-2">
-                      <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: `${60 + Math.random() * 30}%` }} />
-                      <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: `${40 + Math.random() * 40}%` }} />
-                      {Math.random() > 0.5 && <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: `${30 + Math.random() * 50}%` }} />}
+                      <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: "75%" }} />
+                      <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: "60%" }} />
+                      {index % 2 === 0 && <div className="h-4 bg-muted-foreground/20 rounded animate-pulse" style={{ width: "45%" }} />}
                     </div>
                   </div>
                 </div>

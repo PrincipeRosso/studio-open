@@ -1,16 +1,16 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create threads table (references auth.users instead of public.users)
+-- Create threads table
 CREATE TABLE IF NOT EXISTS threads (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     title VARCHAR(500) NOT NULL,
     agent_id VARCHAR(100) DEFAULT 'studio',
     agent_name VARCHAR(100) DEFAULT 'Studio',
-    model_id VARCHAR(200) DEFAULT 'openai/gpt-oss-20b:free',
-    model_name VARCHAR(200) DEFAULT 'GPT OSS 20B',
-    model_provider VARCHAR(100) DEFAULT 'OpenRouter',
+    model_id VARCHAR(200) DEFAULT 'gpt-4.1-mini',
+    model_name VARCHAR(200) DEFAULT 'GPT-4.1 Mini',
+    model_provider VARCHAR(100) DEFAULT 'OpenAI',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -39,14 +39,9 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create triggers to automatically update updated_at
+-- Create trigger to automatically update updated_at for threads
 CREATE TRIGGER update_threads_updated_at 
     BEFORE UPDATE ON threads 
-    FOR EACH ROW 
-    EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_messages_updated_at 
-    BEFORE UPDATE ON messages 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
@@ -55,7 +50,6 @@ ALTER TABLE threads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
 -- Create RLS policies for threads
--- Users can only see and modify their own threads
 CREATE POLICY "Users can view own threads" ON threads
     FOR SELECT USING (auth.uid() = user_id);
 
@@ -68,7 +62,7 @@ CREATE POLICY "Users can update own threads" ON threads
 CREATE POLICY "Users can delete own threads" ON threads
     FOR DELETE USING (auth.uid() = user_id);
 
--- Users can only see and modify messages in their own threads
+-- Create RLS policies for messages
 CREATE POLICY "Users can view messages in own threads" ON messages
     FOR SELECT USING (
         EXISTS (

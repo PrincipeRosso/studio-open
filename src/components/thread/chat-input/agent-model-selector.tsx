@@ -47,10 +47,10 @@ const defaultAgents: Agent[] = [
 
 const defaultModels: Model[] = [
   {
-    id: 'openai/gpt-oss-20b:free',
-    name: 'GPT OSS 20B',
-    provider: 'OpenRouter',
-    description: 'Modello gratuito per uso generale'
+    id: 'gpt-4.1-mini',
+    name: 'GPT-4.1 Mini',
+    provider: 'OpenAI',
+    description: 'Modello OpenAI ottimizzato per prestazioni e costi'
   }
 ];
 

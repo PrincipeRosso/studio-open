@@ -44,13 +44,11 @@ export class MessageService {
         .single()
 
       if (error) {
-        console.error('Errore nella creazione del messaggio:', error)
         return null
       }
 
       return data
     } catch (error) {
-      console.error('Errore nella creazione del messaggio:', error)
       return null
     }
   }
@@ -67,13 +65,11 @@ export class MessageService {
         .order('created_at', { ascending: true })
 
       if (error) {
-        console.error('Errore nel recupero dei messaggi:', error)
         return []
       }
 
       return data || []
     } catch (error) {
-      console.error('Errore nel recupero dei messaggi:', error)
       return []
     }
   }
@@ -90,13 +86,11 @@ export class MessageService {
         .single()
 
       if (error) {
-        console.error('Errore nel recupero del messaggio:', error)
         return null
       }
 
       return data
     } catch (error) {
-      console.error('Errore nel recupero del messaggio:', error)
       return null
     }
   }
@@ -108,41 +102,37 @@ export class MessageService {
       
       const { data, error } = await client
         .from('messages')
-        .update(updates as any)
+        .update(updates)
         .eq('id', messageId)
         .select()
         .single()
 
       if (error) {
-        console.error('Errore nell\'aggiornamento del messaggio:', error)
         return null
       }
 
       return data
     } catch (error) {
-      console.error('Errore nell\'aggiornamento del messaggio:', error)
       return null
     }
   }
 
-  // Aggiorna il contenuto di un messaggio
+  // Aggiorna solo il contenuto di un messaggio
   async updateMessageContent(messageId: string, content: string): Promise<boolean> {
     try {
       const client = this.supabase || await this.initServerClient()
       
       const { error } = await client
         .from('messages')
-        .update({ content } as any)
+        .update({ content })
         .eq('id', messageId)
 
       if (error) {
-        console.error('Errore nell\'aggiornamento del contenuto:', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Errore nell\'aggiornamento del contenuto:', error)
       return false
     }
   }
@@ -158,13 +148,11 @@ export class MessageService {
         .eq('id', messageId)
 
       if (error) {
-        console.error('Errore nell\'eliminazione del messaggio:', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Errore nell\'eliminazione del messaggio:', error)
       return false
     }
   }
@@ -180,18 +168,16 @@ export class MessageService {
         .eq('thread_id', threadId)
 
       if (error) {
-        console.error('Errore nell\'eliminazione dei messaggi del thread:', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Errore nell\'eliminazione dei messaggi del thread:', error)
       return false
     }
   }
 
-  // Crea un messaggio utente e uno dell'assistente in una transazione
+  // Crea una coppia di messaggi (utente + assistente)
   async createMessagePair(
     threadId: string, 
     userContent: string, 
@@ -200,46 +186,35 @@ export class MessageService {
     try {
       const client = this.supabase || await this.initServerClient()
       
-      // Crea il messaggio dell'utente
-      const { data: userMessage, error: userError } = await client
-        .from('messages')
-        .insert({
-          thread_id: threadId,
-          role: 'user',
-          content: userContent
-        } as any)
-        .select()
-        .single()
+      // Crea il messaggio utente
+      const userMessage = await this.createMessage({
+        thread_id: threadId,
+        role: 'user',
+        content: userContent
+      } as MessageInsert)
 
-      if (userError) {
-        console.error('Errore nella creazione del messaggio utente:', userError)
+      if (!userMessage) {
         return { userMessage: null, assistantMessage: null }
       }
 
-      // Crea il messaggio dell'assistente
-      const { data: assistantMessage, error: assistantError } = await client
-        .from('messages')
-        .insert({
-          thread_id: threadId,
-          role: 'assistant',
-          content: assistantContent
-        } as any)
-        .select()
-        .single()
+      // Crea il messaggio assistente
+      const assistantMessage = await this.createMessage({
+        thread_id: threadId,
+        role: 'assistant',
+        content: assistantContent
+      } as MessageInsert)
 
-      if (assistantError) {
-        console.error('Errore nella creazione del messaggio assistente:', assistantError)
+      if (!assistantMessage) {
         return { userMessage, assistantMessage: null }
       }
 
       return { userMessage, assistantMessage }
     } catch (error) {
-      console.error('Errore nella creazione della coppia di messaggi:', error)
       return { userMessage: null, assistantMessage: null }
     }
   }
 
-  // Conta i messaggi in un thread
+  // Conta i messaggi di un thread
   async countThreadMessages(threadId: string): Promise<number> {
     try {
       const client = this.supabase || await this.initServerClient()
@@ -250,13 +225,11 @@ export class MessageService {
         .eq('thread_id', threadId)
 
       if (error) {
-        console.error('Errore nel conteggio dei messaggi:', error)
         return 0
       }
 
       return count || 0
     } catch (error) {
-      console.error('Errore nel conteggio dei messaggi:', error)
       return 0
     }
   }

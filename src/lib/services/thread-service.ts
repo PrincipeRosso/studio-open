@@ -99,7 +99,6 @@ export class ThreadService {
         .single()
 
       if (threadError) {
-        console.error('Errore nel recupero del thread:', threadError)
         return null
       }
 
@@ -110,7 +109,6 @@ export class ThreadService {
         .order('created_at', { ascending: true })
 
       if (messagesError) {
-        console.error('Errore nel recupero dei messaggi:', messagesError)
         return null
       }
 
@@ -119,7 +117,6 @@ export class ThreadService {
         messages: messages || []
       } as ThreadWithMessages
     } catch (error) {
-      console.error('Errore nel recupero del thread con messaggi:', error)
       return null
     }
   }
@@ -131,41 +128,37 @@ export class ThreadService {
       
       const { data, error } = await client
         .from('threads')
-        .update(updates as any)
+        .update(updates)
         .eq('id', threadId)
         .select()
         .single()
 
       if (error) {
-        console.error('Errore nell\'aggiornamento del thread:', error)
         return null
       }
 
       return data
     } catch (error) {
-      console.error('Errore nell\'aggiornamento del thread:', error)
       return null
     }
   }
 
-  // Aggiorna il titolo di un thread
+  // Aggiorna solo il titolo di un thread
   async updateThreadTitle(threadId: string, title: string): Promise<boolean> {
     try {
       const client = this.supabase || await this.initServerClient()
       
       const { error } = await client
         .from('threads')
-        .update({ title } as any)
+        .update({ title })
         .eq('id', threadId)
 
       if (error) {
-        console.error('Errore nell\'aggiornamento del titolo:', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Errore nell\'aggiornamento del titolo:', error)
       return false
     }
   }
@@ -181,35 +174,31 @@ export class ThreadService {
         .eq('id', threadId)
 
       if (error) {
-        console.error('Errore nell\'eliminazione del thread:', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Errore nell\'eliminazione del thread:', error)
       return false
     }
   }
 
-  // Aggiorna il timestamp updated_at di un thread (utile quando si aggiunge un messaggio)
+  // Aggiorna il timestamp di ultimo accesso
   async touchThread(threadId: string): Promise<boolean> {
     try {
       const client = this.supabase || await this.initServerClient()
       
       const { error } = await client
         .from('threads')
-        .update({ updated_at: new Date().toISOString() } as any)
+        .update({ updated_at: new Date().toISOString() })
         .eq('id', threadId)
 
       if (error) {
-        console.error('Errore nell\'aggiornamento del timestamp:', error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Errore nell\'aggiornamento del timestamp:', error)
       return false
     }
   }

@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
         : firstMessage,
       user_id: user.id, // Usa l'ID dell'utente autenticato
       agent_id: agent_id || 'studio',
-      model_name: model_name || 'openai/gpt-oss-20b:free'
+      model_name: model_name || 'gpt-4.1-mini'
     }
 
     const newThread = await threadService.createThread(threadData)
@@ -108,8 +108,8 @@ export async function POST(req: NextRequest) {
       },
       model: {
         id: newThread.model_name,
-        name: newThread.model_name?.includes('gpt-oss-20b') ? 'GPT OSS 20B' : 'Modello AI',
-        provider: 'OpenRouter'
+        name: newThread.model_name?.includes('gpt-4.1-mini') ? 'GPT-4.1 Mini' : 'Modello AI',
+        provider: 'OpenAI'
       },
       createdAt: newThread.created_at,
       updatedAt: newThread.updated_at
@@ -175,8 +175,8 @@ export async function GET(req: NextRequest) {
         },
         model: {
           id: thread.model_name,
-          name: thread.model_name?.includes('gpt-oss-20b') ? 'GPT OSS 20B' : 'Modello AI',
-          provider: 'OpenRouter'
+          name: thread.model_name?.includes('gpt-4.1-mini') ? 'GPT-4.1 Mini' : 'Modello AI',
+          provider: 'OpenAI'
         },
         createdAt: thread.created_at,
         updatedAt: thread.updated_at
@@ -196,8 +196,8 @@ export async function GET(req: NextRequest) {
         },
         model: {
           id: thread.model_name,
-          name: thread.model_name?.includes('gpt-oss-20b') ? 'GPT OSS 20B' : 'Modello AI',
-          provider: 'OpenRouter'
+          name: thread.model_name?.includes('gpt-4.1-mini') ? 'GPT-4.1 Mini' : 'Modello AI',
+          provider: 'OpenAI'
         },
         createdAt: thread.created_at,
         updatedAt: thread.updated_at

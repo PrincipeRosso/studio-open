@@ -32,7 +32,7 @@ function DashboardContent() {
           id: threadId,
           firstMessage: message,
           agent_id: options?.agent_id || 'studio',
-          model_name: options?.model_name || 'openai/gpt-oss-20b:free'
+          model_name: options?.model_name || 'gpt-4.1-mini'
         })
       })
 

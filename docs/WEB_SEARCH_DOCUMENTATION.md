@@ -331,6 +331,59 @@ console.log(`Immagini estratte: ${extractedImages.size}`);
 
 ## 📝 Changelog
 
+### **v2.3.15 - System Prompt Professionale per Research Assistant**
+- ✅ Implementato system prompt professionale per il web search tool
+- ✅ L'assistente è ora un "Expert Research Assistant"
+- ✅ Istruzioni dettagliate per summary professionali
+- ✅ Focus su ricerca accurata e ben referenziata
+- ✅ Bilanciamento tra profondità tecnica e accessibilità
+- ✅ Verifica delle informazioni tra fonti multiple
+- ✅ Prospettive diverse quando rilevanti
+- ✅ Summary strutturati logicamente e organizzati
+### **v2.3.14 - Miglioramento Qualità Contenuti e Risposte**
+- ✅ Aumentata lunghezza contenuti da 300 a 500 caratteri per più contesto
+- ✅ Migliorato languageInstruction per summary più dettagliati
+- ✅ System prompt aggiornato per risposte concise e contestuali
+- ✅ Assistente non ripete più il summary del tool
+- ✅ Risposte limitate a 2-3 frasi dopo i tool calls
+- ✅ Aggiunti esempi pratici nel system prompt
+- ✅ Istruzioni chiare per evitare ripetizioni
+- ✅ Focus su valore aggiunto e insights contestuali
+### **v2.3.13 - Correzione Ordine Rendering Tool Calls e Testo**
+- ✅ Risolto ordine rendering: tool calls prima, testo dopo
+- ✅ Separato rendering tool calls dal testo
+- ✅ Tool calls mostrati per primi
+- ✅ Testo dell'assistente streammato dopo i tool calls
+- ✅ Ordine corretto garantito sempre
+- ✅ User experience migliorata con flusso logico
+### **v2.3.12 - Rimozione Titoli Sotto Immagini**
+- ✅ Rimossi titoli sotto le card immagini
+- ✅ Layout più pulito e minimalista
+- ✅ Focus completamente sulle immagini
+- ✅ Card immagini più compatte
+- ✅ Aspetto più moderno e professionale
+- ✅ Ridotta distrazione visiva
+### **v2.3.11 - Colori Link in Tema**
+- ✅ Modificati colori link da blu fisso a colori del tema
+- ✅ Usato text-primary invece di text-blue-600
+- ✅ Usato hover:text-primary/80 invece di hover:text-blue-800
+- ✅ Link ora coerenti con il design system
+- ✅ Supporto per tema chiaro e scuro
+- ✅ Aspetto più professionale e coerente
+### **v2.3.10 - Layout Card Immagini in Fila Orizzontale**
+- ✅ Corretto layout da griglia verticale a fila orizzontale
+- ✅ Usato flex invece di grid per layout orizzontale
+- ✅ Aggiunto overflow-x-auto per scroll orizzontale se necessario
+- ✅ Impostata larghezza fissa w-32 per ogni card immagine
+- ✅ Aggiunto flex-shrink-0 per evitare compressione delle card
+- ✅ Layout orizzontale più naturale e intuitivo
+### **v2.3.9 - Correzione Rilevamento Lingua e Ordine Messaggi**
+- ✅ Migliorato algoritmo rilevamento lingua con più parole chiave
+- ✅ Aggiunto supporto per caratteri speciali italiani (àèéìíîòóùú)
+- ✅ System prompt più esplicito sulla lingua da usare
+- ✅ Istruzioni chiare per mantenere la lingua durante la conversazione
+- ✅ Risolto problema streaming sopra invocation tool
+- ✅ Ordine messaggi corretto (tool call → risposta)
 ### **v2.3.8 - System Prompt Ottimizzato per Concisione**
 - ✅ System prompt modificato per risposte concise dopo tool calls
 - ✅ Istruzioni esplicite per evitare ripetizioni eccessive
@@ -920,8 +973,480 @@ const languageInstruction = userLanguage === 'italiano'
 - ✅ **Chiarezza** nella strutturazione
 - ✅ **Riduzione verbosità** inutile
 
+### **Correzione Rilevamento Lingua e Ordine Messaggi:**
+
+#### **Problemi Risolti:**
+1. **Lingua**: L'assistente continuava a rispondere in inglese anche quando l'utente scriveva in italiano
+2. **Ordine**: Il testo veniva streammato sopra l'invocation tool invece che dopo
+
+#### **Soluzioni Implementate:**
+
+##### **1. Algoritmo Rilevamento Lingua Migliorato:**
+```typescript
+const detectLanguage = (text: string): string => {
+  // Parole italiane estese
+  const italianWords = ['il', 'la', 'di', 'che', 'e', 'un', 'una', 'per', 'con', 'su', 'da', 'in', 'del', 'della', 'dei', 'delle', 'sono', 'hai', 'ho', 'mi', 'ti', 'ci', 'vi', 'lo', 'gli', 'le', 'si', 'no', 'sì', 'come', 'quando', 'dove', 'perché', 'cosa', 'chi', 'quale', 'quali', 'questo', 'questa', 'questi', 'queste', 'quello', 'quella', 'quelli', 'quelle'];
+  
+  // Parole inglesi estese
+  const englishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'is', 'are', 'was', 'were', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'must', 'this', 'that', 'these', 'those', 'what', 'when', 'where', 'why', 'how', 'who', 'which'];
+  
+  const words = text.toLowerCase().split(/\s+/);
+  const italianCount = words.filter(word => italianWords.includes(word)).length;
+  const englishCount = words.filter(word => englishWords.includes(word)).length;
+  
+  // Fallback per caratteri speciali italiani
+  if (italianCount === 0 && englishCount === 0) {
+    const italianChars = /[àèéìíîòóùú]/;
+    return italianChars.test(text.toLowerCase()) ? 'italiano' : 'inglese';
+  }
+  
+  return italianCount > englishCount ? 'italiano' : 'inglese';
+};
+```
+
+##### **2. System Prompt Più Esplicito:**
+```typescript
+IMPORTANTE LINGUA:
+- Rispondi SEMPRE nella stessa lingua della query dell'utente
+- Se l'utente scrive in italiano, rispondi SEMPRE in italiano
+- Se l'utente scrive in inglese, rispondi SEMPRE in inglese
+- Se l'utente scrive in francese, rispondi SEMPRE in francese
+- Se l'utente scrive in spagnolo, rispondi SEMPRE in spagnolo
+- NON cambiare mai lingua durante la conversazione
+- Usa UN SOLO tool per richiesta, non fare multiple ricerche automatiche
+
+DOPO aver usato i tool di ricerca web:
+- Sii CONCISO e diretto nella risposta
+- Evita ripetizioni eccessive
+- Concentrati sui punti chiave
+- Fornisci informazioni essenziali senza essere prolisso
+- Struttura la risposta in modo chiaro e organizzato
+- Mantieni SEMPRE la stessa lingua della query dell'utente
+```
+
+##### **3. Ordine Messaggi Corretto:**
+- ✅ **Tool call** viene creato e visualizzato per primo
+- ✅ **Risposta dell'assistente** viene streammata dopo il tool call
+- ✅ **AI SDK** gestisce automaticamente l'ordine corretto
+- ✅ **Persistenza** mantiene l'ordine corretto nel database
+
+#### **Risultati:**
+- ✅ **Rilevamento lingua accurato** per italiano e inglese
+- ✅ **Supporto caratteri speciali** italiani (àèéìíîòóùú)
+- ✅ **Risposte sempre nella lingua** dell'utente
+- ✅ **Ordine messaggi corretto** (tool call → risposta)
+- ✅ **Streaming corretto** dopo l'invocation tool
+- ✅ **User experience migliorata** con comportamento coerente
+
+### **Layout Card Immagini in Fila Orizzontale:**
+
+#### **Obiettivo:**
+Correggere il layout delle immagini per mostrarle in una fila orizzontale invece che in una griglia verticale.
+
+#### **Modifiche Implementate:**
+
+##### **1. Da Grid a Flex:**
+```typescript
+// Prima (griglia verticale)
+<div className="grid grid-cols-4 gap-2">
+
+// Dopo (fila orizzontale)
+<div className="flex gap-2 overflow-x-auto">
+```
+
+##### **2. Larghezza Fissa per Card:**
+```typescript
+// Prima (larghezza automatica)
+<div key={idx} className="border rounded overflow-hidden bg-background">
+
+// Dopo (larghezza fissa)
+<div key={idx} className="flex-shrink-0 w-32 border rounded overflow-hidden bg-background">
+```
+
+##### **3. Scroll Orizzontale:**
+```typescript
+// Aggiunto overflow-x-auto per scroll se necessario
+<div className="flex gap-2 overflow-x-auto">
+```
+
+##### **4. Layout Risultante:**
+```
+┌─────────┬─────────┬─────────┬─────────┐
+│ Immagine│ Immagine│ Immagine│ Immagine│
+│    1    │    2    │    3    │    4    │
+├─────────┼─────────┼─────────┼─────────┤
+│ Titolo  │ Titolo  │ Titolo  │ Titolo  │
+│  1      │  2      │  3      │  4      │
+└─────────┴─────────┴─────────┴─────────┘
+```
+
+#### **Vantaggi:**
+- ✅ **Layout orizzontale** naturale e intuitivo
+- ✅ **Scroll orizzontale** se necessario
+- ✅ **Larghezza fissa** per consistenza
+- ✅ **Nessuna compressione** delle card
+- ✅ **Aspetto più moderno** e pulito
+- ✅ **Responsive** su dispositivi mobili
+
+#### **Applicato a:**
+- ✅ **Web Search Tool** - Fila orizzontale di immagini
+- ✅ **News Search Tool** - Fila orizzontale di immagini
+- ✅ **Layout responsive** mantenuto
+- ✅ **Error handling** preservato
+
+### **Colori Link in Tema:**
+
+#### **Problema Risolto:**
+I link per accedere alle notizie e alle fonti utilizzavano colori blu fissi (`text-blue-600`, `hover:text-blue-800`) che non erano coerenti con il design system dell'applicazione.
+
+#### **Soluzione Implementata:**
+
+##### **1. Colori Link Aggiornati:**
+```typescript
+// Prima (colori blu fissi)
+<div className="text-xs text-blue-600 hover:text-blue-800">
+  <a href={source.url} target="_blank" rel="noopener noreferrer">
+    {t('webSearch.readMore')}
+  </a>
+</div>
+
+// Dopo (colori del tema)
+<div className="text-xs text-primary hover:text-primary/80">
+  <a href={source.url} target="_blank" rel="noopener noreferrer">
+    {t('webSearch.readMore')}
+  </a>
+</div>
+```
+
+##### **2. Applicato a Entrambi i Tool:**
+- ✅ **Web Search Tool** - Link "Leggi di più" con colori del tema
+- ✅ **News Search Tool** - Link "Leggi notizia" con colori del tema
+
+##### **3. Vantaggi dei Colori del Tema:**
+- ✅ **Coerenza** con il design system
+- ✅ **Supporto tema chiaro/scuro** automatico
+- ✅ **Colori primari** dell'applicazione
+- ✅ **Aspetto professionale** e uniforme
+- ✅ **Accessibilità** migliorata
+- ✅ **Manutenibilità** del codice
+
+#### **Risultati:**
+- ✅ **Link coerenti** con il design system
+- ✅ **Supporto completo** per tema chiaro e scuro
+- ✅ **Aspetto professionale** e uniforme
+- ✅ **Migliore accessibilità** dei link
+- ✅ **Design system** rispettato completamente
+
+### **Rimozione Titoli Sotto Immagini:**
+
+#### **Obiettivo:**
+Semplificare il layout delle card immagini rimuovendo i titoli sotto le immagini per un aspetto più pulito e minimalista.
+
+#### **Modifiche Implementate:**
+
+##### **1. Layout Semplificato:**
+```typescript
+// Prima (con titoli)
+<div key={idx} className="flex-shrink-0 w-32 border rounded overflow-hidden bg-background">
+  <img 
+    src={item.img} 
+    alt={`Immagine da ${item.source.title}`}
+    className="w-full h-24 object-cover"
+    onError={(e) => {
+      e.currentTarget.parentElement!.style.display = 'none';
+    }}
+  />
+  <div className="p-1">
+    <div className="text-xs text-muted-foreground line-clamp-2">{item.source.title}</div>
+  </div>
+</div>
+
+// Dopo (senza titoli)
+<div key={idx} className="flex-shrink-0 w-32 border rounded overflow-hidden bg-background">
+  <img 
+    src={item.img} 
+    alt={`Immagine da ${item.source.title}`}
+    className="w-full h-24 object-cover"
+    onError={(e) => {
+      e.currentTarget.parentElement!.style.display = 'none';
+    }}
+  />
+</div>
+```
+
+##### **2. Applicato a Entrambi i Tool:**
+- ✅ **Web Search Tool** - Card immagini senza titoli
+- ✅ **News Search Tool** - Card immagini senza titoli
+
+##### **3. Vantaggi del Layout Semplificato:**
+- ✅ **Focus completo** sulle immagini
+- ✅ **Layout più pulito** e minimalista
+- ✅ **Card più compatte** e leggere
+- ✅ **Aspetto più moderno** e professionale
+- ✅ **Ridotta distrazione** visiva
+- ✅ **Migliore impatto** visivo
+
+#### **Risultati:**
+- ✅ **Layout minimalista** e pulito
+- ✅ **Focus sulle immagini** senza distrazioni
+- ✅ **Aspetto più moderno** e professionale
+- ✅ **Card più compatte** e leggere
+- ✅ **Migliore user experience** visiva
+
+### **Correzione Ordine Rendering Tool Calls e Testo:**
+
+#### **Problema Risolto:**
+Il testo dell'assistente veniva streammato e posizionato PRIMA dell'invocation tool, anche se il tool era già completato e visualizzato. Questo creava un ordine illogico: testo → tool call invece di tool call → testo.
+
+#### **Ordine Desiderato:**
+```
+1. Messaggio utente
+2. Loading state dell'agente
+3. Invocation tool (tool call)
+4. Risposta testuale dell'agente
+```
+
+#### **Ordine Precedente (Problema):**
+```
+1. Messaggio utente
+2. Loading state dell'agente
+3. Risposta testuale dell'agente ❌ (streammata sopra)
+4. Invocation tool ❌ (sotto la risposta)
+```
+
+#### **Soluzione Implementata:**
+
+##### **1. Separazione Rendering per Tipo di Messaggio:**
+```typescript
+{/* Per messaggi dell'assistente: prima i tool calls, poi il testo */}
+{!isUser && message.parts && message.parts.length > 0 && (
+  <div className="space-y-2">
+    {/* Prima mostra i tool calls */}
+    {message.parts.filter(part => part.type?.startsWith('tool-')).map((part, index) => {
+      // Rendering dei tool calls (webSearch, newsSearch)
+    })}
+    
+    {/* Poi mostra il testo dopo i tool calls */}
+    {message.parts.filter(part => part.type === 'text').map((part, index) => (
+      <div key={`text-${index}`} className="text-base leading-relaxed whitespace-pre-wrap">
+        {part.text}
+      </div>
+    ))}
+  </div>
+)}
+```
+
+##### **2. Gestione Messaggi Utente:**
+```typescript
+{/* Per messaggi utente: mostra solo il contenuto */}
+{isUser && message.content && (
+  <div className="text-base leading-relaxed whitespace-pre-wrap">
+    {message.content}
+  </div>
+)}
+```
+
+##### **3. Fallback per Messaggi Senza Parts:**
+```typescript
+{/* Per messaggi assistente senza parts: mostra il contenuto */}
+{!isUser && (!message.parts || message.parts.length === 0) && message.content && (
+  <div className="text-base leading-relaxed whitespace-pre-wrap">
+    {message.content}
+  </div>
+)}
+```
+
+#### **Vantaggi:**
+- ✅ **Ordine logico** tool call → testo
+- ✅ **Flusso naturale** della conversazione
+- ✅ **User experience** migliorata
+- ✅ **Nessun rerendering** brutto
+- ✅ **Streaming corretto** dopo i tool calls
+- ✅ **Comportamento prevedibile** sempre
+
+#### **Risultati:**
+- ✅ **Tool calls** mostrati per primi
+- ✅ **Testo** streammato dopo i tool calls
+- ✅ **Ordine corretto** garantito sempre
+- ✅ **Flusso logico** e intuitivo
+- ✅ **User experience** professionale
+
+### **Miglioramento Qualità Contenuti e Risposte:**
+
+#### **Obiettivi:**
+1. Migliorare il summary generato dai tool (DETTAGLIATO)
+2. Aumentare la qualità e quantità dei contenuti
+3. Evitare che l'assistente ripeta il summary già mostrato (CONCISO)
+
+#### **⚠️ IMPORTANTE - Distinzione Chiave:**
+- **Summary del Tool**: Deve essere **DETTAGLIATO** e **COMPLETO** con analisi approfondita
+- **Risposta dell'Agente**: Deve essere **BREVE** e **CONTESTUALE** (2-3 frasi) senza ripetere il summary
+
+#### **Modifiche Implementate:**
+
+##### **1. Contenuti Più Ricchi (300 → 500 caratteri):**
+```typescript
+// Prima
+content: result.content.substring(0, 300),
+
+// Dopo
+content: result.content.substring(0, 500), // Aumentato per più contesto
+```
+
+##### **2. Language Instruction Corretto:**
+```typescript
+const languageInstruction = userLanguage === 'italiano' 
+  ? `ISTRUZIONI PER IL SUMMARY:
+     Questo summary deve essere DETTAGLIATO e COMPLETO in italiano:
+     - Fornisci un'analisi approfondita delle informazioni trovate
+     - Includi dettagli specifici, statistiche, date e contesto
+     - Struttura il summary in modo chiaro con introduzione, sviluppo e conclusioni
+     - Usa un linguaggio ricco e informativo
+     - Collega le informazioni da diverse fonti quando possibile
+     
+     ISTRUZIONI PER LA RISPOSTA DELL'AGENTE DOPO IL TOOL:
+     La risposta dell'agente DOPO aver mostrato questo summary deve essere BREVE (2-3 frasi):
+     - L'agente NON deve ripetere questo summary
+     - L'agente deve solo aggiungere un commento contestuale o chiedere se serve altro`
+  : // English version
+```
+
+**IMPORTANTE**: Il summary del tool è DETTAGLIATO, la risposta dell'agente è CONCISA.
+
+##### **3. System Prompt Ottimizzato:**
+```typescript
+IMPORTANTE - DOPO aver usato i tool di ricerca web:
+I tool hanno GIÀ fornito un SUMMARY DETTAGLIATO delle informazioni/notizie trovate.
+La tua risposta deve essere MOLTO BREVE e CONTESTUALE (2-3 frasi massimo):
+- NON ripetere il summary già mostrato dal tool
+- NON creare un altro riassunto delle informazioni
+- NON elencare nuovamente le fonti o i dettagli già mostrati
+- Rispondi direttamente alla domanda dell'utente in modo naturale
+- Aggiungi valore con un commento, insight o collegamento contestuale
+- Sii conversazionale e umano, non ripetitivo
+```
+
+##### **4. Esempi Pratici nel System Prompt:**
+```typescript
+Esempio CORRETTO:
+Utente: "Dammi notizie su ChatGPT"
+Tool: [mostra summary dettagliato + 5 fonti]
+Tu: "Come puoi vedere dalle fonti trovate, ChatGPT continua ad evolversi rapidamente. C'è qualcosa di specifico che ti interessa approfondire?"
+
+Esempio SBAGLIATO:
+Tu: "ChatGPT è un modello di linguaggio... [ripete il summary del tool]... Come mostrato nelle fonti..."
+```
+
+#### **Vantaggi:**
+- ✅ **Contenuti più ricchi** (500 vs 300 caratteri)
+- ✅ **Summary più dettagliati** dai tool
+- ✅ **Nessuna ripetizione** da parte dell'assistente
+- ✅ **Risposte concise** e contestuali
+- ✅ **Valore aggiunto** con insights
+- ✅ **User experience** migliorata
+- ✅ **Conversazioni più naturali** e fluide
+
+#### **Risultati:**
+- ✅ **Più contesto** per ogni fonte (67% in più)
+- ✅ **Istruzioni chiare** per l'assistente
+- ✅ **Esempi pratici** nel system prompt
+- ✅ **Risposte brevi** (2-3 frasi max)
+- ✅ **Focus su valore** aggiunto
+- ✅ **Nessuna ridondanza** informativa
+
+### **System Prompt Professionale per Research Assistant:**
+
+#### **Nuovo Ruolo:**
+L'assistente ora si presenta come un **"Expert Research Assistant"** specializzato nella raccolta e analisi completa di informazioni, fornendo ricerche accurate, dettagliate e pertinenti.
+
+#### **Istruzioni per il Summary (DETTAGLIATO):**
+
+##### **Web Search Tool:**
+```typescript
+Sei un Assistente di Ricerca esperto specializzato nella raccolta e analisi completa di informazioni.
+
+ISTRUZIONI PER IL SUMMARY:
+Crea un summary DETTAGLIATO e PROFESSIONALE che:
+1. Identifica il tema centrale e i sottotemi
+2. Fornisce un'analisi approfondita delle informazioni trovate
+3. Include dettagli specifici, statistiche, date e contesto
+4. Verifica le informazioni tra fonti multiple
+5. Presenta prospettive diverse quando rilevanti
+6. Fornisce citazioni e riferimenti appropriati
+7. Bilancia profondità tecnica con accessibilità
+
+Il summary deve essere:
+- Ben ricercato e accurato
+- Propriamente citato e referenziato
+- Logicamente strutturato e organizzato
+- Bilanciato nelle prospettive
+- Chiaro e accessibile
+- Tecnicamente preciso quando necessario
+- Pratico e applicabile
+```
+
+##### **News Search Tool:**
+```typescript
+Sei un Assistente di Ricerca esperto specializzato nell'analisi di notizie e sviluppi attuali.
+
+ISTRUZIONI PER IL SUMMARY DELLE NOTIZIE:
+Crea un summary DETTAGLIATO e GIORNALISTICO che:
+1. Identifica gli eventi principali e i sottotemi
+2. Fornisce un'analisi approfondita delle notizie trovate
+3. Include dettagli specifici, sviluppi recenti, date e contesto
+4. Verifica le informazioni tra fonti multiple di notizie
+5. Presenta prospettive diverse quando rilevanti
+6. Fornisce citazioni dalle fonti giornalistiche
+7. Bilancia profondità informativa con chiarezza
+8. Collega eventi correlati quando appropriato
+
+Il summary delle notizie deve essere:
+- Ben ricercato e verificato
+- Propriamente citato dalle fonti
+- Logicamente strutturato e cronologico
+- Bilanciato nelle prospettive
+- Chiaro e accessibile
+- Giornalisticamente preciso
+- Attuale e rilevante
+```
+
+#### **Caratteristiche Chiave:**
+
+##### **1. Ricerca Professionale:**
+- ✅ Identifica temi centrali e sottotemi
+- ✅ Analisi approfondita delle informazioni
+- ✅ Verifica tra fonti multiple
+- ✅ Prospettive diverse e bilanciate
+
+##### **2. Qualità del Contenuto:**
+- ✅ Ben ricercato e accurato
+- ✅ Propriamente citato e referenziato
+- ✅ Logicamente strutturato
+- ✅ Tecnicamente preciso
+
+##### **3. Accessibilità:**
+- ✅ Chiaro e accessibile
+- ✅ Bilanciato tra profondità e chiarezza
+- ✅ Pratico e applicabile
+- ✅ Strutturato in modo logico
+
+##### **4. Standard Giornalistici (News):**
+- ✅ Cronologico quando appropriato
+- ✅ Collegamenti tra eventi
+- ✅ Sviluppi recenti evidenziati
+- ✅ Citazioni dalle fonti
+
+#### **Vantaggi:**
+- ✅ **Summary più professionali** e strutturati
+- ✅ **Ricerca di qualità** superiore
+- ✅ **Verifiche multiple** delle informazioni
+- ✅ **Prospettive bilanciate** e complete
+- ✅ **Citazioni appropriate** dalle fonti
+- ✅ **Analisi approfondite** ma accessibili
+- ✅ **Standard giornalistici** per le notizie
+
 ---
 
 **Stato Attuale**: ✅ **Completamente Funzionante**
-**Ultima Modifica**: System prompt ottimizzato per concisione
+**Ultima Modifica**: System prompt professionale per Research Assistant
 **Prossimi Passi**: Mantenimento e aggiornamenti futuri

@@ -31,20 +31,64 @@ export const webSearchTool = tool({
 
       // Determina la lingua della query per il summary
       const detectLanguage = (text: string): string => {
-        const italianWords = ['il', 'la', 'di', 'che', 'e', 'un', 'una', 'per', 'con', 'su', 'da', 'in', 'del', 'della', 'dei', 'delle'];
-        const englishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about'];
+        const italianWords = ['il', 'la', 'di', 'che', 'e', 'un', 'una', 'per', 'con', 'su', 'da', 'in', 'del', 'della', 'dei', 'delle', 'sono', 'hai', 'ho', 'mi', 'ti', 'ci', 'vi', 'lo', 'gli', 'le', 'si', 'no', 'sì', 'come', 'quando', 'dove', 'perché', 'cosa', 'chi', 'quale', 'quali', 'questo', 'questa', 'questi', 'queste', 'quello', 'quella', 'quelli', 'quelle'];
+        const englishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'is', 'are', 'was', 'were', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'must', 'this', 'that', 'these', 'those', 'what', 'when', 'where', 'why', 'how', 'who', 'which'];
         
         const words = text.toLowerCase().split(/\s+/);
         const italianCount = words.filter(word => italianWords.includes(word)).length;
         const englishCount = words.filter(word => englishWords.includes(word)).length;
+        
+        // Se non ci sono parole riconosciute, controlla caratteri speciali italiani
+        if (italianCount === 0 && englishCount === 0) {
+          const italianChars = /[àèéìíîòóùú]/;
+          return italianChars.test(text.toLowerCase()) ? 'italiano' : 'inglese';
+        }
         
         return italianCount > englishCount ? 'italiano' : 'inglese';
       };
 
       const userLanguage = detectLanguage(query);
       const languageInstruction = userLanguage === 'italiano' 
-        ? 'Rispondi sempre in italiano. DOPO aver usato questo tool, sii CONCISO e diretto nella risposta. Evita ripetizioni eccessive, concentrati sui punti chiave e fornisci informazioni essenziali senza essere prolisso. Struttura la risposta in modo chiaro e organizzato.'
-        : 'Respond in English. AFTER using this tool, be CONCISE and direct in your response. Avoid excessive repetitions, focus on key points and provide essential information without being verbose. Structure the response in a clear and organized way.';
+        ? `Sei un Assistente di Ricerca esperto specializzato nella raccolta e analisi completa di informazioni. Il tuo obiettivo è aiutare gli utenti a trovare informazioni accurate, dettagliate e pertinenti su vari argomenti.
+
+           ISTRUZIONI PER IL SUMMARY:
+           Crea un summary DETTAGLIATO e PROFESSIONALE in italiano che:
+           1. Identifica il tema centrale e i sottotemi
+           2. Fornisce un'analisi approfondita delle informazioni trovate
+           3. Include dettagli specifici, statistiche, date e contesto
+           4. Verifica le informazioni tra fonti multiple
+           5. Presenta prospettive diverse quando rilevanti
+           6. Fornisce citazioni e riferimenti appropriati
+           7. Bilancia profondità tecnica con accessibilità
+           
+           Il summary deve essere:
+           - Ben ricercato e accurato
+           - Propriamente citato e referenziato
+           - Logicamente strutturato e organizzato
+           - Bilanciato nelle prospettive
+           - Chiaro e accessibile
+           - Tecnicamente preciso quando necessario
+           - Pratico e applicabile`
+        : `You are an expert Research Assistant specializing in comprehensive information gathering and analysis. Your goal is to help users find accurate, detailed, and relevant information across various topics.
+
+           INSTRUCTIONS FOR THE SUMMARY:
+           Create a DETAILED and PROFESSIONAL summary in English that:
+           1. Identifies the core topic and subtopics
+           2. Provides an in-depth analysis of the information found
+           3. Includes specific details, statistics, dates and context
+           4. Verifies information across multiple sources
+           5. Presents diverse perspectives when relevant
+           6. Provides proper citations and references
+           7. Balances technical depth with accessibility
+           
+           The summary should be:
+           - Well-researched and accurate
+           - Properly cited and referenced
+           - Logically structured and organized
+           - Balanced in perspective
+           - Clear and accessible
+           - Technically precise when needed
+           - Practical and applicable`;
 
       // Ritorna un oggetto semplice con i risultati
       return {
@@ -60,7 +104,7 @@ export const webSearchTool = tool({
           return {
             title: result.title,
             url: result.url,
-            content: result.content.substring(0, 300),
+            content: result.content.substring(0, 500), // Aumentato da 300 a 500 caratteri per più contesto
             images,
             rawContent: result.raw_content,
             publishedDate: result.published_date,
@@ -107,20 +151,66 @@ export const newsSearchTool = tool({
 
       // Determina la lingua della query per il summary
       const detectLanguage = (text: string): string => {
-        const italianWords = ['il', 'la', 'di', 'che', 'e', 'un', 'una', 'per', 'con', 'su', 'da', 'in', 'del', 'della', 'dei', 'delle'];
-        const englishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about'];
+        const italianWords = ['il', 'la', 'di', 'che', 'e', 'un', 'una', 'per', 'con', 'su', 'da', 'in', 'del', 'della', 'dei', 'delle', 'sono', 'hai', 'ho', 'mi', 'ti', 'ci', 'vi', 'lo', 'gli', 'le', 'si', 'no', 'sì', 'come', 'quando', 'dove', 'perché', 'cosa', 'chi', 'quale', 'quali', 'questo', 'questa', 'questi', 'queste', 'quello', 'quella', 'quelli', 'quelle'];
+        const englishWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'is', 'are', 'was', 'were', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'must', 'this', 'that', 'these', 'those', 'what', 'when', 'where', 'why', 'how', 'who', 'which'];
         
         const words = text.toLowerCase().split(/\s+/);
         const italianCount = words.filter(word => italianWords.includes(word)).length;
         const englishCount = words.filter(word => englishWords.includes(word)).length;
+        
+        // Se non ci sono parole riconosciute, controlla caratteri speciali italiani
+        if (italianCount === 0 && englishCount === 0) {
+          const italianChars = /[àèéìíîòóùú]/;
+          return italianChars.test(text.toLowerCase()) ? 'italiano' : 'inglese';
+        }
         
         return italianCount > englishCount ? 'italiano' : 'inglese';
       };
 
       const userLanguage = detectLanguage(query);
       const languageInstruction = userLanguage === 'italiano' 
-        ? 'Rispondi sempre in italiano. DOPO aver usato questo tool, sii CONCISO e diretto nella risposta. Evita ripetizioni eccessive, concentrati sui punti chiave delle notizie e fornisci informazioni essenziali senza essere prolisso. Struttura la risposta in modo chiaro e organizzato.'
-        : 'Respond in English. AFTER using this tool, be CONCISE and direct in your response. Avoid excessive repetitions, focus on key points of the news and provide essential information without being verbose. Structure the response in a clear and organized way.';
+        ? `Sei un Assistente di Ricerca esperto specializzato nell'analisi di notizie e sviluppi attuali. Il tuo obiettivo è fornire una copertura completa e accurata degli eventi recenti.
+
+           ISTRUZIONI PER IL SUMMARY DELLE NOTIZIE:
+           Crea un summary DETTAGLIATO e GIORNALISTICO in italiano che:
+           1. Identifica gli eventi principali e i sottotemi
+           2. Fornisce un'analisi approfondita delle notizie trovate
+           3. Include dettagli specifici, sviluppi recenti, date e contesto
+           4. Verifica le informazioni tra fonti multiple di notizie
+           5. Presenta prospettive diverse quando rilevanti
+           6. Fornisce citazioni dalle fonti giornalistiche
+           7. Bilancia profondità informativa con chiarezza
+           8. Collega eventi correlati quando appropriato
+           
+           Il summary delle notizie deve essere:
+           - Ben ricercato e verificato
+           - Propriamente citato dalle fonti
+           - Logicamente strutturato e cronologico
+           - Bilanciato nelle prospettive
+           - Chiaro e accessibile
+           - Giornalisticamente preciso
+           - Attuale e rilevante`
+        : `You are an expert Research Assistant specializing in news analysis and current developments. Your goal is to provide comprehensive and accurate coverage of recent events.
+
+           INSTRUCTIONS FOR THE NEWS SUMMARY:
+           Create a DETAILED and JOURNALISTIC summary in English that:
+           1. Identifies the main events and subtopics
+           2. Provides an in-depth analysis of the news found
+           3. Includes specific details, recent developments, dates and context
+           4. Verifies information across multiple news sources
+           5. Presents diverse perspectives when relevant
+           6. Provides citations from journalistic sources
+           7. Balances informational depth with clarity
+           8. Connects related events when appropriate
+           
+           The news summary should be:
+           - Well-researched and verified
+           - Properly cited from sources
+           - Logically structured and chronological
+           - Balanced in perspectives
+           - Clear and accessible
+           - Journalistically precise
+           - Current and relevant`;
 
       return {
         query: results.query,
@@ -135,7 +225,7 @@ export const newsSearchTool = tool({
           return {
             title: result.title,
             url: result.url,
-            content: result.content.substring(0, 300),
+            content: result.content.substring(0, 500), // Aumentato da 300 a 500 caratteri per più contesto
             images,
             rawContent: result.raw_content,
             publishedDate: result.published_date,

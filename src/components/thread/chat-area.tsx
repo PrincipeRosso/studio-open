@@ -176,17 +176,11 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
           ? "bg-card text-foreground rounded-3xl border border-border shadow-sm px-4 py-4" 
           : "text-foreground"
       )}>
-        {/* Contenuto testuale */}
-        {message.content && (
-          <div className="text-base leading-relaxed whitespace-pre-wrap">
-            {message.content}
-          </div>
-        )}
-        
-        {/* Tool calls e risultati */}
-        {message.parts && message.parts.length > 0 && (
+        {/* Per messaggi dell'assistente: prima i tool calls, poi il testo */}
+        {!isUser && message.parts && message.parts.length > 0 && (
           <div className="space-y-2">
-            {message.parts.map((part, index) => {
+            {/* Prima mostra i tool calls */}
+            {message.parts.filter(part => part.type?.startsWith('tool-')).map((part, index) => {
               // Tool calls per webSearch
               if (part.type === 'tool-webSearch') {
                 switch (part.state) {
@@ -230,24 +224,21 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                         {part.output?.sources && part.output.sources.some((s: any) => s.images && s.images.length > 0) && (
                           <div className="mb-3">
                             <div className="text-xs font-medium text-muted-foreground mb-2">{t('webSearch.imagesFound')}</div>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="flex gap-2 overflow-x-auto">
                               {part.output.sources
                                 .filter((source: any) => source.images && source.images.length > 0)
                                 .flatMap((source: any) => source.images.slice(0, 1).map((img: string) => ({ img, source })))
                                 .slice(0, 4)
                                 .map((item: any, idx: number) => (
-                                  <div key={idx} className="border rounded overflow-hidden bg-background">
+                                  <div key={idx} className="flex-shrink-0 w-32 border rounded overflow-hidden bg-background">
                                     <img 
                                       src={item.img} 
                                       alt={`Immagine da ${item.source.title}`}
-                                      className="w-full h-32 object-cover"
+                                      className="w-full h-24 object-cover"
                                       onError={(e) => {
                                         e.currentTarget.parentElement!.style.display = 'none';
                                       }}
                                     />
-                                    <div className="p-2">
-                                      <div className="text-xs text-muted-foreground line-clamp-2">{item.source.title}</div>
-                                    </div>
                                   </div>
                                 ))}
                             </div>
@@ -270,7 +261,7 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                               <div key={idx} className="text-xs border rounded p-2 bg-background/50">
                                 <div className="font-medium text-foreground mb-1">{source.title}</div>
                                 <div className="text-muted-foreground mb-1">{source.content}</div>
-                                <div className="text-xs text-blue-600 hover:text-blue-800">
+                                <div className="text-xs text-primary hover:text-primary/80">
                                   <a href={source.url} target="_blank" rel="noopener noreferrer">
                                     {t('webSearch.readMore')}
                                   </a>
@@ -338,24 +329,21 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                         {part.output?.news && part.output.news.some((n: any) => n.images && n.images.length > 0) && (
                           <div className="mb-3">
                             <div className="text-xs font-medium text-muted-foreground mb-2">{t('newsSearch.imagesFound')}</div>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="flex gap-2 overflow-x-auto">
                               {part.output.news
                                 .filter((news: any) => news.images && news.images.length > 0)
                                 .flatMap((news: any) => news.images.slice(0, 1).map((img: string) => ({ img, news })))
                                 .slice(0, 4)
                                 .map((item: any, idx: number) => (
-                                  <div key={idx} className="border rounded overflow-hidden bg-background">
+                                  <div key={idx} className="flex-shrink-0 w-32 border rounded overflow-hidden bg-background">
                                     <img 
                                       src={item.img} 
                                       alt={`Immagine da ${item.news.title}`}
-                                      className="w-full h-32 object-cover"
+                                      className="w-full h-24 object-cover"
                                       onError={(e) => {
                                         e.currentTarget.parentElement!.style.display = 'none';
                                       }}
                                     />
-                                    <div className="p-2">
-                                      <div className="text-xs text-muted-foreground line-clamp-2">{item.news.title}</div>
-                                    </div>
                                   </div>
                                 ))}
                             </div>
@@ -383,7 +371,7 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                                     {t('newsSearch.published')} {new Date(news.publishedDate).toLocaleDateString('it-IT')}
                                   </div>
                                 )}
-                                <div className="text-xs text-blue-600 hover:text-blue-800">
+                                <div className="text-xs text-primary hover:text-primary/80">
                                   <a href={news.url} target="_blank" rel="noopener noreferrer">
                                     {t('newsSearch.readNews')}
                                   </a>
@@ -410,6 +398,27 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
 
               return null;
             })}
+            
+            {/* Poi mostra il testo dopo i tool calls */}
+            {message.parts.filter(part => part.type === 'text').map((part, index) => (
+              <div key={`text-${index}`} className="text-base leading-relaxed whitespace-pre-wrap">
+                {part.text}
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Per messaggi utente: mostra solo il contenuto */}
+        {isUser && message.content && (
+          <div className="text-base leading-relaxed whitespace-pre-wrap">
+            {message.content}
+          </div>
+        )}
+        
+        {/* Per messaggi assistente senza parts: mostra il contenuto */}
+        {!isUser && (!message.parts || message.parts.length === 0) && message.content && (
+          <div className="text-base leading-relaxed whitespace-pre-wrap">
+            {message.content}
           </div>
         )}
       </div>

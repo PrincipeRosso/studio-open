@@ -127,10 +127,55 @@
       "published": "Published:",
       "readNews": "Read news →"
     },
+    "composio": {
+      "executing": "Executing...",
+      "completed": "Operation completed successfully",
+      "error": "Operation failed",
+      "googleCalendar": "Google Calendar",
+      "gmail": "Gmail",
+      "slack": "Slack",
+      "github": "GitHub",
+      "notion": "Notion",
+      "trello": "Trello",
+      "asana": "Asana",
+      "operations": {
+        "createEvent": "Event created",
+        "updateEvent": "Event updated",
+        "deleteEvent": "Event deleted",
+        "listEvents": "Events retrieved",
+        "getEvent": "Event retrieved",
+        "sendEmail": "Email sent",
+        "createIssue": "Issue created",
+        "sendMessage": "Message sent"
+      }
+    },
     "generic": {
       "tool": "Tool",
       "unknownError": "Unknown error"
     }
+  },
+  "integrations": {
+    "title": "Third-Party App Integrations",
+    "description": "Connect your favorite apps to automate your workflows",
+    "searchPlaceholder": "Search apps...",
+    "connectedApps": "Connected Apps",
+    "popularApps": "Popular Apps",
+    "manageAll": "Manage all integrations",
+    "connect": "Connect",
+    "disconnect": "Disconnect",
+    "connecting": "Connecting...",
+    "connected": "Connected",
+    "available": "Available",
+    "permissions": "permissions",
+    "connectedOn": "Connected on",
+    "moreApps": "And {count} more apps available...",
+    "noApps": "No apps available",
+    "loadingApps": "Loading apps...",
+    "errorLoading": "Error loading apps",
+    "errorConnecting": "Error connecting",
+    "errorDisconnecting": "Error disconnecting",
+    "successConnected": "App connected successfully",
+    "successDisconnected": "App disconnected successfully"
   },
   "chat": {
     "typing": "Typing...",

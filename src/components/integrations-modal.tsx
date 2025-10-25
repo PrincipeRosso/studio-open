@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ComposioApp, ComposioConnection } from '@/lib/services/composio-service';
 import { GoogleCalendarIcon } from '@/components/google-calendar-icon';
+import { useTranslations } from 'next-intl';
 
 interface IntegrationsModalProps {
   userId: string;
@@ -34,6 +35,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
   open,
   onOpenChange
 }) => {
+  const t = useTranslations('integrations');
   const [availableApps, setAvailableApps] = useState<ComposioApp[]>([]);
   const [connectedApps, setConnectedApps] = useState<ComposioConnection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -205,10 +207,10 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings2 className="h-5 w-5" />
-            Integrazioni App Terze
+            {t('title')}
           </DialogTitle>
           <DialogDescription>
-            Connetti le tue app preferite per automatizzare i tuoi workflow
+            {t('description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -218,7 +220,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Cerca app..."
+                placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 h-9 bg-muted/50 border-0 rounded-lg placeholder:text-muted-foreground/60 focus-visible:bg-background transition-colors"
@@ -231,7 +233,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                 size="sm"
                 onClick={() => setViewMode('grid')}
                 className="h-7 w-7 p-0"
-                title="Vista griglia"
+                title="Grid view"
               >
                 <Grid3X3 className="h-4 w-4" />
               </Button>
@@ -240,22 +242,22 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                 size="sm"
                 onClick={() => setViewMode('list')}
                 className="h-7 w-7 p-0"
-                title="Vista lista"
+                title="List view"
               >
                 <List className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
-          {/* Statistiche */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              <span>{connectedApps.length} connesse</span>
+          {/* Statistiche - Design minimal */}
+          <div className="flex items-center gap-6 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>{connectedApps.length} {t('connected')}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <Zap className="h-4 w-4 text-blue-500" />
-              <span>{availableApps.length} disponibili</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span>{availableApps.length} {t('available')}</span>
             </div>
           </div>
 
@@ -266,7 +268,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
             {isLoading ? (
               <div className="flex items-center justify-center h-32">
                 <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="ml-2">Caricamento app...</span>
+                <span className="ml-2">{t('loadingApps')}</span>
               </div>
             ) : (
               <div className={cn(
@@ -331,7 +333,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                           <div className="flex flex-col gap-3">
                             <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
                               <Shield className="h-3 w-3" />
-                              <span>{app.permissions.length} permessi</span>
+                              <span>{app.permissions.length} {t('permissions')}</span>
                             </div>
                             
                             <div className="flex justify-center">
@@ -342,7 +344,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                                   onClick={() => handleDisconnectApp(connectedApp?.id || app.id)}
                                   className="h-7 px-3 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                                 >
-                                  Disconnetti
+{t('disconnect')}
                                 </Button>
                               ) : (
                                 <Button
@@ -355,10 +357,10 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                                   {isConnecting === app.id ? (
                                     <>
                                       <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                      Connessione...
+                                      {t('connecting')}
                                     </>
                                   ) : (
-                                    'Connetti'
+                                    t('connect')
                                   )}
                                 </Button>
                               )}
@@ -367,7 +369,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                             {isConnected && connectedApp && (
                               <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
                                 <Clock className="h-3 w-3" />
-                                <span>Connessa il {new Date(connectedApp.createdAt).toLocaleDateString()}</span>
+                                <span>{t('connectedOn')} {new Date(connectedApp.createdAt).toLocaleDateString()}</span>
                               </div>
                             )}
                           </div>
@@ -375,7 +377,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Shield className="h-3 w-3" />
-                              <span>{app.permissions.length} permessi</span>
+                              <span>{app.permissions.length} {t('permissions')}</span>
                             </div>
                             
                             <div className="flex items-center gap-2">
@@ -386,7 +388,7 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                                   onClick={() => handleDisconnectApp(connectedApp?.id || app.id)}
                                   className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                                 >
-                                  Disconnetti
+{t('disconnect')}
                                 </Button>
                               ) : (
                                 <Button
@@ -399,10 +401,10 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
                                   {isConnecting === app.id ? (
                                     <>
                                       <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                      Connessione...
+                                      {t('connecting')}
                                     </>
                                   ) : (
-                                    'Connetti'
+                                    t('connect')
                                   )}
                                 </Button>
                               )}

@@ -133,10 +133,55 @@
       "published": "Pubblicato:",
       "readNews": "Leggi notizia →"
     },
+    "composio": {
+      "executing": "Esecuzione in corso...",
+      "completed": "Operazione completata con successo",
+      "error": "Operazione fallita",
+      "googleCalendar": "Google Calendar",
+      "gmail": "Gmail",
+      "slack": "Slack",
+      "github": "GitHub",
+      "notion": "Notion",
+      "trello": "Trello",
+      "asana": "Asana",
+      "operations": {
+        "createEvent": "Evento creato",
+        "updateEvent": "Evento aggiornato",
+        "deleteEvent": "Evento eliminato",
+        "listEvents": "Eventi recuperati",
+        "getEvent": "Evento recuperato",
+        "sendEmail": "Email inviata",
+        "createIssue": "Issue creata",
+        "sendMessage": "Messaggio inviato"
+      }
+    },
     "generic": {
       "tool": "Strumento",
       "unknownError": "Errore sconosciuto"
     }
+  },
+  "integrations": {
+    "title": "Integrazioni App Terze",
+    "description": "Connetti le tue app preferite per automatizzare i tuoi workflow",
+    "searchPlaceholder": "Cerca app...",
+    "connectedApps": "App Connesse",
+    "popularApps": "App Popolari",
+    "manageAll": "Gestisci tutte le integrazioni",
+    "connect": "Connetti",
+    "disconnect": "Disconnetti",
+    "connecting": "Connessione...",
+    "connected": "Connessa",
+    "available": "Disponibile",
+    "permissions": "permessi",
+    "connectedOn": "Connessa il",
+    "moreApps": "E altre {count} app disponibili...",
+    "noApps": "Nessuna app disponibile",
+    "loadingApps": "Caricamento app...",
+    "errorLoading": "Errore nel caricamento delle app",
+    "errorConnecting": "Errore nella connessione",
+    "errorDisconnecting": "Errore nella disconnessione",
+    "successConnected": "App connessa con successo",
+    "successDisconnected": "App disconnessa con successo"
   },
   "chat": {
     "typing": "Sta scrivendo...",

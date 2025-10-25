@@ -26,6 +26,28 @@ export async function POST(req: Request) {
     const selectedModel = model_name || 'gpt-4.1-mini';
     const selectedAgent = agent_id || 'studio';
 
+    // Genera informazioni temporali per l'agente
+    const now = new Date();
+    const timeInfo = {
+      currentDate: now.toLocaleDateString('it-IT', { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }),
+      currentTime: now.toLocaleTimeString('it-IT', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        timeZone: 'Europe/Rome'
+      }),
+      isoDate: now.toISOString().split('T')[0], // YYYY-MM-DD
+      isoDateTime: now.toISOString(),
+      timezone: 'Europe/Rome (CET/CEST)'
+    };
+
+    // Debug: Log delle informazioni temporali
+    console.log('🕐 Informazioni temporali generate:', timeInfo);
+
     // Recupera i tools di Composio per l'utente (se ha app connesse)
     let composioTools: Record<string, any> = {};
     try {
@@ -52,6 +74,30 @@ export async function POST(req: Request) {
     switch (selectedAgent) {
       case 'studio':
     systemMessage = `Sei un assistente AI chiamato Studio, progettato per aiutare gli utenti con conversazioni generali e supporto tecnico.
+
+    INFORMAZIONI TEMPORALI CORRENTI:
+    - Data e ora attuale: ${timeInfo.currentDate} alle ${timeInfo.currentTime}
+    - Data ISO: ${timeInfo.isoDate}
+    - Data e ora ISO completa: ${timeInfo.isoDateTime}
+    - Fuso orario: ${timeInfo.timezone}
+    
+    ⚠️ CRITICO - RIFERIMENTI TEMPORALI:
+    La data corrente è: ${timeInfo.currentDate} (${timeInfo.isoDate})
+    L'ora corrente è: ${timeInfo.currentTime}
+    
+    REGOLE ASSOLUTE PER LE DATE:
+    - "OGGI" = ${timeInfo.isoDate} (NON ALTRE DATE!)
+    - "DOMANI" = ${new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]} (NON ALTRE DATE!)
+    - "IERI" = ${new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]} (NON ALTRE DATE!)
+    - NON usare MAI date diverse da quelle specificate sopra
+    - NON basarti sulle tue conoscenze pre-addestrate per le date
+    - USA SEMPRE le date esatte fornite qui sopra
+    - Per eventi e appuntamenti, usa sempre il formato ISO (YYYY-MM-DD)
+    - Considera sempre il fuso orario italiano (Europe/Rome)
+    
+    ESEMPIO CONCRETO:
+    Se l'utente dice "crea un evento per domani", usa SEMPRE la data: ${new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+    NON usare MAI altre date come 2024-06-05 o qualsiasi altra data diversa da quella specificata.
 
     Hai accesso a UN SOLO strumento di ricerca intelligente:
 
@@ -101,7 +147,31 @@ export async function POST(req: Request) {
         tools = [smartSearchTool];
         break;
       default:
-        systemMessage = 'Sei un assistente AI utile e cordiale.';
+        systemMessage = `Sei un assistente AI utile e cordiale.
+
+    INFORMAZIONI TEMPORALI CORRENTI:
+    - Data e ora attuale: ${timeInfo.currentDate} alle ${timeInfo.currentTime}
+    - Data ISO: ${timeInfo.isoDate}
+    - Data e ora ISO completa: ${timeInfo.isoDateTime}
+    - Fuso orario: ${timeInfo.timezone}
+    
+    ⚠️ CRITICO - RIFERIMENTI TEMPORALI:
+    La data corrente è: ${timeInfo.currentDate} (${timeInfo.isoDate})
+    L'ora corrente è: ${timeInfo.currentTime}
+    
+    REGOLE ASSOLUTE PER LE DATE:
+    - "OGGI" = ${timeInfo.isoDate} (NON ALTRE DATE!)
+    - "DOMANI" = ${new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]} (NON ALTRE DATE!)
+    - "IERI" = ${new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]} (NON ALTRE DATE!)
+    - NON usare MAI date diverse da quelle specificate sopra
+    - NON basarti sulle tue conoscenze pre-addestrate per le date
+    - USA SEMPRE le date esatte fornite qui sopra
+    - Per eventi e appuntamenti, usa sempre il formato ISO (YYYY-MM-DD)
+    - Considera sempre il fuso orario italiano (Europe/Rome)
+    
+    ESEMPIO CONCRETO:
+    Se l'utente dice "crea un evento per domani", usa SEMPRE la data: ${new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+    NON usare MAI altre date come 2024-06-05 o qualsiasi altra data diversa da quella specificata.`;
         tools = [smartSearchTool];
     }
 

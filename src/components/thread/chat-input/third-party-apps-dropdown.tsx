@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { ComposioApp, ComposioConnection } from '@/lib/services/composio-service';
 import { IntegrationsModal } from '@/components/integrations-modal';
 import { GoogleCalendarIcon } from '@/components/google-calendar-icon';
+import { useTranslations } from 'next-intl';
 
 interface ThirdPartyAppsDropdownProps {
   userId: string;
@@ -27,6 +28,7 @@ export const ThirdPartyAppsDropdown: React.FC<ThirdPartyAppsDropdownProps> = ({
   userId,
   disabled = false
 }) => {
+  const t = useTranslations('integrations');
   const [availableApps, setAvailableApps] = useState<ComposioApp[]>([]);
   const [connectedApps, setConnectedApps] = useState<ComposioConnection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -213,7 +215,7 @@ export const ThirdPartyAppsDropdown: React.FC<ThirdPartyAppsDropdownProps> = ({
             
             <DropdownMenuContent align="start" className="w-80">
               <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                Integrazioni App Terze
+                {t('title')}
               </DropdownMenuLabel>
               
               {/* App Connesse */}
@@ -221,7 +223,7 @@ export const ThirdPartyAppsDropdown: React.FC<ThirdPartyAppsDropdownProps> = ({
                 <>
                   <DropdownMenuSeparator />
                   <DropdownMenuLabel className="text-xs font-medium">
-                    App Connesse ({connectedApps.length})
+                    {t('connectedApps')} ({connectedApps.length})
                   </DropdownMenuLabel>
                   
                   {connectedApps.map((connection) => (
@@ -261,7 +263,7 @@ export const ThirdPartyAppsDropdown: React.FC<ThirdPartyAppsDropdownProps> = ({
               {/* App Disponibili */}
               <DropdownMenuSeparator />
               <DropdownMenuLabel className="text-xs font-medium">
-                App Popolari
+                {t('popularApps')}
               </DropdownMenuLabel>
               
               {availableApps.slice(0, 5).map((app) => {
@@ -301,13 +303,13 @@ export const ThirdPartyAppsDropdown: React.FC<ThirdPartyAppsDropdownProps> = ({
                       {isConnectingThis ? (
                         <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
                       ) : isConnected ? (
-                        <span className="text-xs text-muted-foreground">Connessa</span>
+                        <span className="text-xs text-muted-foreground">{t('connected')}</span>
                       ) : (
                         <Button
                           variant="ghost"
                           size="sm"
                           className="h-6 w-6 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                          title="Connetti app"
+                          title={t('connect')}
                         >
                           <Plus className="w-3 h-3" />
                         </Button>
@@ -319,7 +321,7 @@ export const ThirdPartyAppsDropdown: React.FC<ThirdPartyAppsDropdownProps> = ({
               
               {availableApps.length > 5 && (
                 <DropdownMenuItem className="text-center text-xs text-muted-foreground">
-                  E altre {availableApps.length - 5} app disponibili...
+{t('moreApps', { count: availableApps.length - 5 })}
                 </DropdownMenuItem>
               )}
               
@@ -329,14 +331,14 @@ export const ThirdPartyAppsDropdown: React.FC<ThirdPartyAppsDropdownProps> = ({
                 onClick={() => setIsModalOpen(true)}
               >
                 <ExternalLink className="w-3 h-3 mr-1" />
-                Gestisci tutte le integrazioni
+                {t('manageAll')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </TooltipTrigger>
         
         <TooltipContent side="top">
-          <p>Integrazioni App Terze</p>
+          <p>{t('title')}</p>
         </TooltipContent>
       </Tooltip>
       </TooltipProvider>

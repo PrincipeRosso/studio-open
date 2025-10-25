@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react'
 import { StudioIcon } from '@/components/studio-icon'
 import { GoogleCalendarIcon } from '@/components/google-calendar-icon'
+import { MiniCalendar } from '@/components/mini-calendar'
 import { User, Search, Newspaper, Loader2, Mail, MessageSquare, Github, Slack, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
@@ -35,6 +36,26 @@ interface ChatAreaProps {
 }
 
 const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName, args }) => {
+  const t = useTranslations('tools')
+  
+  const getComposioOperation = (name: string) => {
+    const parts = name.split('_')
+    const action = parts.slice(1).join('_').toLowerCase()
+    
+    const operations: Record<string, string> = {
+      'create_event': t('composio.operations.createEvent'),
+      'update_event': t('composio.operations.updateEvent'),
+      'delete_event': t('composio.operations.deleteEvent'),
+      'list_events': t('composio.operations.listEvents'),
+      'get_event': t('composio.operations.getEvent'),
+      'send_email': t('composio.operations.sendEmail'),
+      'create_issue': t('composio.operations.createIssue'),
+      'send_message': t('composio.operations.sendMessage')
+    }
+    
+    return operations[action] || t('composio.completed')
+  }
+  
   const getToolIcon = (toolName: string) => {
     // Tool di ricerca
     if (toolName === 'webSearch' || toolName === 'smartSearch') {
@@ -75,10 +96,10 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
   const getToolLabel = (toolName: string) => {
     // Tool di ricerca
     if (toolName === 'webSearch' || toolName === 'smartSearch') {
-      return 'Ricerca intelligente'
+      return t('webSearch.label')
     }
     if (toolName === 'newsSearch') {
-        return 'Ricerca notizie'
+      return t('newsSearch.label')
     }
     
     // Tool Composio - formatta il nome
@@ -89,13 +110,13 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
       const action = parts.slice(1).join(' ').toLowerCase()
       
       const appNames: Record<string, string> = {
-        'googlecalendar': 'Google Calendar',
-        'gmail': 'Gmail',
-        'slack': 'Slack',
-        'github': 'GitHub',
-        'notion': 'Notion',
-        'trello': 'Trello',
-        'asana': 'Asana'
+        'googlecalendar': t('composio.googleCalendar'),
+        'gmail': t('composio.gmail'),
+        'slack': t('composio.slack'),
+        'github': t('composio.github'),
+        'notion': t('composio.notion'),
+        'trello': t('composio.trello'),
+        'asana': t('composio.asana')
       }
       
       const appName = appNames[app] || app.charAt(0).toUpperCase() + app.slice(1)
@@ -104,7 +125,7 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
       return `${appName}: ${actionName}`
     }
     
-    return 'Strumento'
+    return t('generic.tool')
   }
 
   return (
@@ -117,7 +138,7 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
           {getToolLabel(toolName)}
         </div>
         <div className="text-xs text-muted-foreground">
-          {args?.query || 'Esecuzione in corso...'}
+          {args?.query || t('composio.executing')}
         </div>
       </div>
       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -126,6 +147,26 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
 }
 
 const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, result }) => {
+  const t = useTranslations('tools')
+  
+  const getComposioOperation = (name: string) => {
+    const parts = name.split('_')
+    const action = parts.slice(1).join('_').toLowerCase()
+    
+    const operations: Record<string, string> = {
+      'create_event': t('composio.operations.createEvent'),
+      'update_event': t('composio.operations.updateEvent'),
+      'delete_event': t('composio.operations.deleteEvent'),
+      'list_events': t('composio.operations.listEvents'),
+      'get_event': t('composio.operations.getEvent'),
+      'send_email': t('composio.operations.sendEmail'),
+      'create_issue': t('composio.operations.createIssue'),
+      'send_message': t('composio.operations.sendMessage')
+    }
+    
+    return operations[action] || t('composio.completed')
+  }
+  
   const getToolIcon = (toolName: string) => {
     // Tool di ricerca
     if (toolName === 'webSearch' || toolName === 'smartSearch') {
@@ -166,10 +207,10 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
   const getToolLabel = (toolName: string) => {
     // Tool di ricerca
     if (toolName === 'webSearch' || toolName === 'smartSearch') {
-      return 'Risultati ricerca intelligente'
+      return t('webSearch.completed')
     }
     if (toolName === 'newsSearch') {
-        return 'Risultati notizie'
+      return t('newsSearch.completed')
     }
     
     // Tool Composio - formatta il nome
@@ -179,13 +220,13 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
       const action = parts.slice(1).join(' ').toLowerCase()
       
       const appNames: Record<string, string> = {
-        'googlecalendar': 'Google Calendar',
-        'gmail': 'Gmail',
-        'slack': 'Slack',
-        'github': 'GitHub',
-        'notion': 'Notion',
-        'trello': 'Trello',
-        'asana': 'Asana'
+        'googlecalendar': t('composio.googleCalendar'),
+        'gmail': t('composio.gmail'),
+        'slack': t('composio.slack'),
+        'github': t('composio.github'),
+        'notion': t('composio.notion'),
+        'trello': t('composio.trello'),
+        'asana': t('composio.asana')
       }
       
       const appName = appNames[app] || app.charAt(0).toUpperCase() + app.slice(1)
@@ -194,7 +235,7 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
       return `${appName}: ${actionName}`
     }
     
-    return 'Risultato strumento'
+    return t('generic.tool')
   }
 
   if (!result?.success) {
@@ -204,7 +245,7 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
           {getToolIcon(toolName)}
         </div>
         <div className="text-sm text-destructive">
-          Errore: {result?.error || 'Errore sconosciuto'}
+          {t('composio.error')}: {result?.error || t('generic.unknownError')}
         </div>
       </div>
     )
@@ -235,6 +276,13 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
               • {source.title}
             </div>
           ))}
+        </div>
+      )}
+      
+      {/* Mostra l'operazione specifica per tool Composio */}
+      {toolName.includes('_') && (
+        <div className="text-sm text-muted-foreground mt-2">
+          ✓ {getComposioOperation(toolName)}
         </div>
       )}
     </div>
@@ -303,19 +351,37 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                   const action = parts.slice(1).join(' ').toLowerCase()
                   
                   const appNames: Record<string, string> = {
-                    'googlecalendar': 'Google Calendar',
-                    'gmail': 'Gmail',
-                    'slack': 'Slack',
-                    'github': 'GitHub',
-                    'notion': 'Notion',
-                    'trello': 'Trello',
-                    'asana': 'Asana'
+                    'googlecalendar': t('composio.googleCalendar'),
+                    'gmail': t('composio.gmail'),
+                    'slack': t('composio.slack'),
+                    'github': t('composio.github'),
+                    'notion': t('composio.notion'),
+                    'trello': t('composio.trello'),
+                    'asana': t('composio.asana')
                   }
                   
                   const appName = appNames[app] || app.charAt(0).toUpperCase() + app.slice(1)
                   const actionName = action.charAt(0).toUpperCase() + action.slice(1)
                   
                   return `${appName}: ${actionName}`
+                }
+                
+                const getComposioOperation = (name: string) => {
+                  const parts = name.split('_')
+                  const action = parts.slice(1).join('_').toLowerCase()
+                  
+                  const operations: Record<string, string> = {
+                    'create_event': t('composio.operations.createEvent'),
+                    'update_event': t('composio.operations.updateEvent'),
+                    'delete_event': t('composio.operations.deleteEvent'),
+                    'list_events': t('composio.operations.listEvents'),
+                    'get_event': t('composio.operations.getEvent'),
+                    'send_email': t('composio.operations.sendEmail'),
+                    'create_issue': t('composio.operations.createIssue'),
+                    'send_message': t('composio.operations.sendMessage')
+                  }
+                  
+                  return operations[action] || t('composio.completed')
                 }
                 
                 switch (part.state) {
@@ -331,13 +397,69 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                             {getComposioLabel(toolName)}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            Esecuzione in corso...
+                            {t('composio.executing')}
                           </div>
                         </div>
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       </div>
                     );
                   case 'output-available':
+                    // Per Google Calendar, mostra il mini calendario
+                    if (toolName.startsWith('GOOGLECALENDAR_')) {
+                      // Debug: log dei dati per capire la struttura
+                      console.log('🗓️ Google Calendar Tool Data:', {
+                        toolName,
+                        partOutput: part.output,
+                        partInput: part.input,
+                        partArgs: part.args,
+                        partState: part.state
+                      });
+                      
+                      // Estrai informazioni dall'output, input o args
+                      const eventData = part.output || part.input || part.args || {};
+                      const eventDate = eventData.start_time || eventData.date || eventData.startTime || eventData.start?.dateTime || eventData.start?.date;
+                      const eventTitle = eventData.summary || eventData.title || eventData.name || eventData.subject;
+                      
+                      // Estrai il tipo di operazione dal nome del tool
+                      const operationType = toolName.split('_').slice(1).join('_').toLowerCase();
+                      
+                      console.log('🗓️ Extracted Event Data:', { eventDate, eventTitle, operationType });
+                      
+                      // Usa la data dell'evento se disponibile, altrimenti usa oggi
+                      const dateToUse = eventDate || new Date().toISOString();
+                      const locale = typeof window !== 'undefined' ? 
+                        (document.documentElement.lang || 'it') : 'it';
+                      const eventTime = eventDate ? 
+                        new Date(eventDate).toLocaleTimeString(locale === 'it' ? 'it-IT' : 'en-US', { 
+                          hour: '2-digit', 
+                          minute: '2-digit' 
+                        }) : undefined;
+                      
+                      return (
+                        <div key={index} className="p-3 bg-muted/30 rounded-lg border border-border/30">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              {getComposioIcon(toolName)}
+                            </div>
+                            <div className="text-sm font-medium text-foreground">
+                              {getComposioLabel(toolName)}
+                            </div>
+                          </div>
+                          <div className="text-sm text-muted-foreground mb-3">
+                            ✓ {getComposioOperation(toolName)}
+                          </div>
+                          {/* Mini Calendar per eventi - sempre mostrato per Google Calendar */}
+                          <MiniCalendar 
+                            date={new Date(dateToUse).toISOString().split('T')[0]}
+                            time={eventTime}
+                            title={eventTitle}
+                            operation={operationType}
+                          />
+                        </div>
+                      );
+                    }
+                    
+                    // Per altre app, mostra il design standard
                     return (
                       <div key={index} className="p-3 bg-muted/30 rounded-lg border border-border/30">
                         <div className="flex items-center gap-2 mb-2">
@@ -349,7 +471,7 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          ✓ Operazione completata con successo
+                          ✓ {getComposioOperation(toolName)}
                         </div>
                       </div>
                     );
@@ -360,7 +482,7 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                           {getComposioIcon(toolName)}
                         </div>
                         <div className="text-sm text-destructive">
-                          Errore: {part.errorText || 'Operazione fallita'}
+                          {t('composio.error')}: {part.errorText || t('composio.error')}
                         </div>
                       </div>
                     );

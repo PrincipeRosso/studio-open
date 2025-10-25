@@ -1,0 +1,23 @@
+---
+alwaysApply: true
+---
+Below is a list of Composio documentation. Use your web and fetch capabilities to read the documentation you need.
+[Composio Documentation](https://docs.composio.dev)
+
+- [Quickstart](https://docs.composio.dev/docs/quickstart.mdx): Add authenticated tool-calling to any LLM agent in three steps.
+- [Configuration](https://docs.composio.dev/docs/configuration.mdx)
+- [Providers](https://docs.composio.dev/docs/providers.mdx)
+- [Executing Tools](https://docs.composio.dev/docs/executing-tools.mdx): Learn how to execute Composio's tools with different providers and frameworks
+- [Authenticating Tools](https://docs.composio.dev/docs/authenticating-tools.mdx): Learn how to authenticate tools
+- [Fetching and Filtering Tools](https://docs.composio.dev/docs/fetching-tools.mdx): Learn how to fetch and filter Composio's tools and toolkits
+- [Modifying tool schemas](https://docs.composio.dev/docs/modifying-tool-schemas): Learn how to use schema modifiers to transform tool schemas before they are seen by agents.
+- [Modifying tool inputs](https://docs.composio.dev/docs/modifying-tool-inputs): Learn how to use before execution modifiers to modify tool arguments before execution.
+- [Modifying tool outputs](https://docs.composio.dev/docs/modifying-tool-outputs): Learn how to use after execution modifiers to transform tool results after execution.
+- [Creating custom tools](https://docs.composio.dev/docs/custom-tools.mdx): Learn how to extend Composio's toolkits with your own tools
+- [Custom Auth Configs](https://docs.composio.dev/docs/custom-auth-configs.mdx): Guide to using customizing auth configs for a toolkit
+- [Programmatic Auth Configs](https://docs.composio.dev/docs/programmatic-auth-configs.mdx): Guide to creating auth configs programmatically
+- [Custom Auth Parameters](https://docs.composio.dev/docs/custom-auth-params.mdx): Guide to injecting custom credentials in headers or parameters for a toolkit
+- [Using Triggers](https://docs.composio.dev/docs/using-triggers.mdx): Send payloads to your system based on external events
+- [Vercel AI SDK Provider](https://docs.composio.dev/providers/vercel.mdx)
+- [Custom Providers](https://docs.composio.dev/toolsets/custom.mdx)
+

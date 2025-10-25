@@ -2,7 +2,8 @@
 
 import React, { useEffect, useRef } from 'react'
 import { StudioIcon } from '@/components/studio-icon'
-import { User, Search, Newspaper, Loader2 } from 'lucide-react'
+import { GoogleCalendarIcon } from '@/components/google-calendar-icon'
+import { User, Search, Newspaper, Loader2, Mail, MessageSquare, Github, Slack, FileText } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { isNewsQuery } from '@/lib/tools/web-search-tool'
@@ -35,27 +36,75 @@ interface ChatAreaProps {
 
 const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName, args }) => {
   const getToolIcon = (toolName: string) => {
-    switch (toolName) {
-      case 'webSearch':
-      case 'smartSearch':
+    // Tool di ricerca
+    if (toolName === 'webSearch' || toolName === 'smartSearch') {
         return <Search className="h-4 w-4" />
-      case 'newsSearch':
-        return <Newspaper className="h-4 w-4" />
-      default:
-        return <Loader2 className="h-4 w-4 animate-spin" />
     }
+    if (toolName === 'newsSearch') {
+        return <Newspaper className="h-4 w-4" />
+    }
+    
+    // Tool Composio - Google Calendar
+    if (toolName.startsWith('GOOGLECALENDAR_')) {
+      return <GoogleCalendarIcon className="h-4 w-4" />
+    }
+    
+    // Tool Composio - Gmail
+    if (toolName.startsWith('GMAIL_')) {
+      return <Mail className="h-4 w-4" />
+    }
+    
+    // Tool Composio - Slack
+    if (toolName.startsWith('SLACK_')) {
+      return <Slack className="h-4 w-4" />
+    }
+    
+    // Tool Composio - GitHub
+    if (toolName.startsWith('GITHUB_')) {
+      return <Github className="h-4 w-4" />
+    }
+    
+    // Tool Composio - generici
+    if (toolName.includes('_')) {
+      return <FileText className="h-4 w-4" />
+    }
+    
+    return <Loader2 className="h-4 w-4 animate-spin" />
   }
 
   const getToolLabel = (toolName: string) => {
-    switch (toolName) {
-      case 'webSearch':
-      case 'smartSearch':
-        return 'Ricerca intelligente'
-      case 'newsSearch':
-        return 'Ricerca notizie'
-      default:
-        return 'Strumento'
+    // Tool di ricerca
+    if (toolName === 'webSearch' || toolName === 'smartSearch') {
+      return 'Ricerca intelligente'
     }
+    if (toolName === 'newsSearch') {
+        return 'Ricerca notizie'
+    }
+    
+    // Tool Composio - formatta il nome
+    if (toolName.includes('_')) {
+      // Es: GOOGLECALENDAR_CREATE_EVENT -> Google Calendar: Create Event
+      const parts = toolName.split('_')
+      const app = parts[0].toLowerCase()
+      const action = parts.slice(1).join(' ').toLowerCase()
+      
+      const appNames: Record<string, string> = {
+        'googlecalendar': 'Google Calendar',
+        'gmail': 'Gmail',
+        'slack': 'Slack',
+        'github': 'GitHub',
+        'notion': 'Notion',
+        'trello': 'Trello',
+        'asana': 'Asana'
+      }
+      
+      const appName = appNames[app] || app.charAt(0).toUpperCase() + app.slice(1)
+      const actionName = action.charAt(0).toUpperCase() + action.slice(1)
+      
+      return `${appName}: ${actionName}`
+    }
+    
+    return 'Strumento'
   }
 
   return (
@@ -78,27 +127,74 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
 
 const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, result }) => {
   const getToolIcon = (toolName: string) => {
-    switch (toolName) {
-      case 'webSearch':
-      case 'smartSearch':
+    // Tool di ricerca
+    if (toolName === 'webSearch' || toolName === 'smartSearch') {
         return <Search className="h-4 w-4" />
-      case 'newsSearch':
-        return <Newspaper className="h-4 w-4" />
-      default:
-        return <Loader2 className="h-4 w-4" />
     }
+    if (toolName === 'newsSearch') {
+        return <Newspaper className="h-4 w-4" />
+    }
+    
+    // Tool Composio - Google Calendar
+    if (toolName.startsWith('GOOGLECALENDAR_')) {
+      return <GoogleCalendarIcon className="h-4 w-4" />
+    }
+    
+    // Tool Composio - Gmail
+    if (toolName.startsWith('GMAIL_')) {
+      return <Mail className="h-4 w-4" />
+    }
+    
+    // Tool Composio - Slack
+    if (toolName.startsWith('SLACK_')) {
+      return <Slack className="h-4 w-4" />
+    }
+    
+    // Tool Composio - GitHub
+    if (toolName.startsWith('GITHUB_')) {
+      return <Github className="h-4 w-4" />
+    }
+    
+    // Tool Composio - generici
+    if (toolName.includes('_')) {
+      return <FileText className="h-4 w-4" />
+    }
+    
+    return <Loader2 className="h-4 w-4" />
   }
 
   const getToolLabel = (toolName: string) => {
-    switch (toolName) {
-      case 'webSearch':
-      case 'smartSearch':
-        return 'Risultati ricerca intelligente'
-      case 'newsSearch':
-        return 'Risultati notizie'
-      default:
-        return 'Risultato strumento'
+    // Tool di ricerca
+    if (toolName === 'webSearch' || toolName === 'smartSearch') {
+      return 'Risultati ricerca intelligente'
     }
+    if (toolName === 'newsSearch') {
+        return 'Risultati notizie'
+    }
+    
+    // Tool Composio - formatta il nome
+    if (toolName.includes('_')) {
+      const parts = toolName.split('_')
+      const app = parts[0].toLowerCase()
+      const action = parts.slice(1).join(' ').toLowerCase()
+      
+      const appNames: Record<string, string> = {
+        'googlecalendar': 'Google Calendar',
+        'gmail': 'Gmail',
+        'slack': 'Slack',
+        'github': 'GitHub',
+        'notion': 'Notion',
+        'trello': 'Trello',
+        'asana': 'Asana'
+      }
+      
+      const appName = appNames[app] || app.charAt(0).toUpperCase() + app.slice(1)
+      const actionName = action.charAt(0).toUpperCase() + action.slice(1)
+      
+      return `${appName}: ${actionName}`
+    }
+    
+    return 'Risultato strumento'
   }
 
   if (!result?.success) {
@@ -186,6 +282,93 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
           <div className="space-y-2">
             {/* Prima mostra i tool calls */}
             {message.parts.filter(part => part.type?.startsWith('tool-')).map((part, index) => {
+              // Estrai il nome del tool dal tipo (es: 'tool-GOOGLECALENDAR_CREATE_EVENT' -> 'GOOGLECALENDAR_CREATE_EVENT')
+              const toolName = part.type?.replace('tool-', '') || '';
+              
+              // Tool Composio (tutti i tool con underscore nel nome)
+              const isComposioTool = toolName.includes('_') && !['webSearch', 'newsSearch', 'smartSearch'].includes(toolName);
+              
+              if (isComposioTool) {
+                const getComposioIcon = (name: string) => {
+                  if (name.startsWith('GOOGLECALENDAR_')) return <GoogleCalendarIcon className="h-4 w-4" />
+                  if (name.startsWith('GMAIL_')) return <Mail className="h-4 w-4" />
+                  if (name.startsWith('SLACK_')) return <Slack className="h-4 w-4" />
+                  if (name.startsWith('GITHUB_')) return <Github className="h-4 w-4" />
+                  return <FileText className="h-4 w-4" />
+                }
+                
+                const getComposioLabel = (name: string) => {
+                  const parts = name.split('_')
+                  const app = parts[0].toLowerCase()
+                  const action = parts.slice(1).join(' ').toLowerCase()
+                  
+                  const appNames: Record<string, string> = {
+                    'googlecalendar': 'Google Calendar',
+                    'gmail': 'Gmail',
+                    'slack': 'Slack',
+                    'github': 'GitHub',
+                    'notion': 'Notion',
+                    'trello': 'Trello',
+                    'asana': 'Asana'
+                  }
+                  
+                  const appName = appNames[app] || app.charAt(0).toUpperCase() + app.slice(1)
+                  const actionName = action.charAt(0).toUpperCase() + action.slice(1)
+                  
+                  return `${appName}: ${actionName}`
+                }
+                
+                switch (part.state) {
+                  case 'input-streaming':
+                  case 'input-available':
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                          {getComposioIcon(toolName)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-foreground">
+                            {getComposioLabel(toolName)}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            Esecuzione in corso...
+                          </div>
+                        </div>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </div>
+                    );
+                  case 'output-available':
+                    return (
+                      <div key={index} className="p-3 bg-muted/30 rounded-lg border border-border/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                            {getComposioIcon(toolName)}
+                          </div>
+                          <div className="text-sm font-medium text-foreground">
+                            {getComposioLabel(toolName)}
+                          </div>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          ✓ Operazione completata con successo
+                        </div>
+                      </div>
+                    );
+                  case 'output-error':
+                    return (
+                      <div key={index} className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center">
+                          {getComposioIcon(toolName)}
+                        </div>
+                        <div className="text-sm text-destructive">
+                          Errore: {part.errorText || 'Operazione fallita'}
+                        </div>
+                      </div>
+                    );
+                  default:
+                    return null;
+                }
+              }
+              
               // Determina il tipo di ricerca per smartSearch
               const isNews = part.type === 'tool-smartSearch' && part.input?.query ? isNewsQuery(part.input.query) : false;
               const isWebSearch = part.type === 'tool-webSearch' || (part.type === 'tool-smartSearch' && (part.output?.sources || (!part.output?.news && !isNews)));

@@ -49,10 +49,6 @@ const DOMAIN_CONFIGS = {
       'adnkronos.com', 'ilmessaggero.it', 'lastampa.it', 'ilgiornale.it',
       'ilfattoquotidiano.it', 'huffingtonpost.it', 'fanpage.it',
       'tuttosport.com', 'calciomercato.com', 'sportmediaset.it'
-    ],
-    excludeDomains: [
-      'wikipedia.org', 'youtube.com', 'facebook.com', 'twitter.com',
-      'instagram.com', 'linkedin.com', 'reddit.com'
     ]
   },
   en: {
@@ -61,10 +57,6 @@ const DOMAIN_CONFIGS = {
       'guardian.com', 'independent.co.uk', 'telegraph.co.uk', 'ft.com',
       'wsj.com', 'bloomberg.com', 'forbes.com', 'techcrunch.com',
       'espn.com', 'sports.yahoo.com', 'skysports.com', 'goal.com'
-    ],
-    excludeDomains: [
-      'wikipedia.org', 'youtube.com', 'facebook.com', 'twitter.com',
-      'instagram.com', 'linkedin.com', 'reddit.com'
     ]
   }
 };
@@ -104,8 +96,7 @@ async function executeWebSearch(query: string) {
       includeRawContent: false, // Disabilitato per ridurre carico
       includeImages: true,
       searchDepth: 'basic', // Ridotto per evitare timeout
-      includeDomains: domainConfig.includeDomains,
-      excludeDomains: domainConfig.excludeDomains,
+      includeDomains: domainConfig.includeDomains
     });
 
     // Controlla se Tavily ha restituito immagini
@@ -194,8 +185,7 @@ async function executeNewsSearch(query: string) {
     const results = await tavilyService.instance.searchNews(query, 5, { // Ridotto per evitare timeout
       includeImages: true,
       includeRawContent: false, // Disabilitato per ridurre carico
-      includeDomains: domainConfig.includeDomains,
-      excludeDomains: domainConfig.excludeDomains,
+      includeDomains: domainConfig.includeDomains
     });
 
     // Controlla se Tavily ha restituito immagini

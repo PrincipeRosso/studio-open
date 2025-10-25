@@ -4,6 +4,7 @@ import { createServerMessageService } from '@/lib/services/message-service';
 import { createServerThreadService } from '@/lib/services/thread-service';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { smartSearchTool } from '@/lib/tools/web-search-tool';
+import { composioService } from '@/lib/services/composio-service';
 
 export async function POST(req: Request) {
   try {
@@ -24,6 +25,25 @@ export async function POST(req: Request) {
     // Usa il modello selezionato dall'utente o il default
     const selectedModel = model_name || 'gpt-4.1-mini';
     const selectedAgent = agent_id || 'studio';
+
+    // Recupera i tools di Composio per l'utente (se ha app connesse)
+    let composioTools: Record<string, any> = {};
+    try {
+      console.log(`🔍 Recupero tools Composio per utente ${user.id}...`);
+      const tools = await composioService.instance.getToolsForUser(user.id);
+      
+      // I tools sono già nel formato corretto (oggetto) per Vercel AI SDK
+      if (typeof tools === 'object' && tools !== null && !Array.isArray(tools)) {
+        composioTools = tools;
+        const toolCount = Object.keys(composioTools).length;
+        console.log(`✅ ${toolCount} tools Composio caricati`);
+      } else {
+        console.warn(`⚠️ Formato tools non valido, ricevuto:`, typeof tools);
+      }
+    } catch (error) {
+      console.error('⚠️ Errore nel recupero tools Composio:', error);
+      // Continua senza tools Composio in caso di errore
+    }
 
     // Personalizza il comportamento in base all'agente selezionato
     let systemMessage = '';
@@ -70,7 +90,14 @@ export async function POST(req: Request) {
     Esempio SBAGLIATO:
     Tu: "ChatGPT è un modello di linguaggio... [ripete il summary del tool]... Come mostrato nelle fonti..."
 
-    I tool ti forniranno anche un'istruzione specifica sulla lingua da usare nel campo 'languageInstruction'.`;
+    I tool ti forniranno anche un'istruzione specifica sulla lingua da usare nel campo 'languageInstruction'.
+    
+    ${Object.keys(composioTools).length > 0 ? `
+    INTEGRAZIONI DISPONIBILI:
+    Hai accesso a ${Object.keys(composioTools).length} strumenti aggiuntivi dalle app che l'utente ha connesso.
+    Questi strumenti ti permettono di interagire con servizi esterni come Gmail, Slack, Google Calendar, GitHub, ecc.
+    Usa questi strumenti quando l'utente ti chiede di eseguire azioni specifiche su queste piattaforme.
+    ` : ''}`;
         tools = [smartSearchTool];
         break;
       default:
@@ -117,12 +144,27 @@ export async function POST(req: Request) {
       }
     }
 
+    // Combina i tools standard con quelli di Composio
+    const allTools: Record<string, any> = {};
+    
+    // Aggiungi i tools standard
+    if (tools.length > 0) {
+      allTools.smartSearch = smartSearchTool;
+    }
+    
+    // Aggiungi i tools di Composio (se disponibili)
+    const composioToolsCount = Object.keys(composioTools).length;
+    if (composioToolsCount > 0) {
+      console.log(`🔧 Aggiunta di ${composioToolsCount} tools Composio all'agent`);
+      // I tools di Composio sono già nel formato corretto per Vercel AI SDK
+      // grazie al VercelProvider - basta fare un merge degli oggetti
+      Object.assign(allTools, composioTools);
+    }
+
     const result = await streamText({
       model: openai(selectedModel),
       messages: messagesWithSystem,
-      tools: tools.length > 0 ? {
-        smartSearch: smartSearchTool,
-      } : undefined,
+      tools: Object.keys(allTools).length > 0 ? allTools : undefined,
       stopWhen: stepCountIs(2), // Ridotto a 2 step per evitare multiple chiamate automatiche
     });
 

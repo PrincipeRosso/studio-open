@@ -6,8 +6,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Loader2, ArrowUp, Paperclip, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/contexts/auth-context';
 import { AgentModelSelector, Agent, Model, defaultAgents, defaultModels } from './agent-model-selector';
 import { CustomTextarea } from './custom-textarea';
+import { ThirdPartyAppsDropdown } from './third-party-apps-dropdown';
 
 export interface ChatInputHandles {
   getPendingFiles: () => File[];
@@ -36,6 +38,7 @@ export interface UploadedFile {
 export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
   ({ onSubmit, placeholder, loading = false, disabled = false, autoFocus = true, value: controlledValue, onChange: controlledOnChange, isLoading = false }, ref) => {
     const t = useTranslations('chatInput');
+    const { user } = useAuth();
     const isControlled = controlledValue !== undefined && controlledOnChange !== undefined;
     const [uncontrolledValue, setUncontrolledValue] = useState('');
     const value = isControlled ? controlledValue : uncontrolledValue;
@@ -130,11 +133,6 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
       setUploadedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
-    const handleThirdPartyApps = () => {
-      // TODO: Implementare logica per integrazione app terze
-      console.log('Integrazione app terze cliccata');
-    };
-
     // Skeleton per lo stato di caricamento
     if (isLoading) {
       return (
@@ -225,23 +223,12 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
                   </TooltipProvider>
                   
                   {/* Third Party Apps Integration */}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={handleThirdPartyApps}
-                          disabled={loading || disabled}
-                          className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-200 hover:bg-muted/50 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          <Settings2 className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">
-                        <p>Integrazioni App Terze</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {user && (
+                    <ThirdPartyAppsDropdown 
+                      userId={user.id}
+                      disabled={loading || disabled}
+                    />
+                  )}
                   
                   {/* Agent and Model Selector */}
                   <AgentModelSelector

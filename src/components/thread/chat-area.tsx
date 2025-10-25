@@ -5,6 +5,7 @@ import { StudioIcon } from '@/components/studio-icon'
 import { User, Search, Newspaper, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { isNewsQuery } from '@/lib/tools/web-search-tool'
 
 interface Message {
   id: string
@@ -36,6 +37,7 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
   const getToolIcon = (toolName: string) => {
     switch (toolName) {
       case 'webSearch':
+      case 'smartSearch':
         return <Search className="h-4 w-4" />
       case 'newsSearch':
         return <Newspaper className="h-4 w-4" />
@@ -47,7 +49,8 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
   const getToolLabel = (toolName: string) => {
     switch (toolName) {
       case 'webSearch':
-        return 'Ricerca web'
+      case 'smartSearch':
+        return 'Ricerca intelligente'
       case 'newsSearch':
         return 'Ricerca notizie'
       default:
@@ -77,6 +80,7 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
   const getToolIcon = (toolName: string) => {
     switch (toolName) {
       case 'webSearch':
+      case 'smartSearch':
         return <Search className="h-4 w-4" />
       case 'newsSearch':
         return <Newspaper className="h-4 w-4" />
@@ -88,7 +92,8 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
   const getToolLabel = (toolName: string) => {
     switch (toolName) {
       case 'webSearch':
-        return 'Risultati ricerca web'
+      case 'smartSearch':
+        return 'Risultati ricerca intelligente'
       case 'newsSearch':
         return 'Risultati notizie'
       default:
@@ -181,18 +186,26 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
           <div className="space-y-2">
             {/* Prima mostra i tool calls */}
             {message.parts.filter(part => part.type?.startsWith('tool-')).map((part, index) => {
-              // Tool calls per webSearch
-              if (part.type === 'tool-webSearch') {
+              // Determina il tipo di ricerca per smartSearch
+              const isNews = part.type === 'tool-smartSearch' && part.input?.query ? isNewsQuery(part.input.query) : false;
+              const isWebSearch = part.type === 'tool-webSearch' || (part.type === 'tool-smartSearch' && (part.output?.sources || (!part.output?.news && !isNews)));
+              
+              // Tool calls per webSearch e smartSearch (quando restituisce sources o durante loading)
+              if (isWebSearch) {
                 switch (part.state) {
                   case 'input-streaming':
                     return (
                       <div key={index} className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Search className="h-4 w-4" />
+                          {part.type === 'tool-smartSearch' && isNews ? <Newspaper className="h-4 w-4" /> : <Search className="h-4 w-4" />}
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-medium text-foreground">{t('webSearch.label')}</div>
-                          <div className="text-xs text-muted-foreground">{t('webSearch.preparing')}</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {part.type === 'tool-smartSearch' ? (isNews ? 'Ricerca notizie' : 'Ricerca web') : t('webSearch.label')}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {part.type === 'tool-smartSearch' ? (isNews ? 'Preparazione ricerca notizie...' : 'Preparazione ricerca...') : t('webSearch.preparing')}
+                          </div>
                         </div>
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       </div>
@@ -201,11 +214,15 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                     return (
                       <div key={index} className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Search className="h-4 w-4" />
+                          {part.type === 'tool-smartSearch' && isNews ? <Newspaper className="h-4 w-4" /> : <Search className="h-4 w-4" />}
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-medium text-foreground">{t('webSearch.label')}</div>
-                          <div className="text-xs text-muted-foreground">{t('webSearch.searching')}: {part.input?.query || '...'}</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {part.type === 'tool-smartSearch' ? (isNews ? 'Ricerca notizie' : 'Ricerca web') : t('webSearch.label')}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {part.type === 'tool-smartSearch' ? (isNews ? 'Ricerca notizie in corso' : 'Ricerca in corso') : t('webSearch.searching')}: {part.input?.query || '...'}
+                          </div>
                         </div>
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       </div>
@@ -217,7 +234,9 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                           <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
                             <Search className="h-4 w-4" />
                           </div>
-                          <div className="text-sm font-medium text-foreground">{t('webSearch.completed')}</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {part.type === 'tool-smartSearch' ? 'Ricerca completata' : t('webSearch.completed')}
+                          </div>
                         </div>
                         
                         {/* Card Immagini Separate - SOPRA il summary */}
@@ -286,8 +305,8 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                 }
               }
 
-              // Tool calls per newsSearch
-              if (part.type === 'tool-newsSearch') {
+              // Tool calls per newsSearch e smartSearch (quando restituisce news o durante loading)
+              if (part.type === 'tool-newsSearch' || (part.type === 'tool-smartSearch' && (part.output?.news || isNews))) {
                 switch (part.state) {
                   case 'input-streaming':
                     return (
@@ -296,8 +315,12 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                           <Newspaper className="h-4 w-4" />
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-medium text-foreground">{t('newsSearch.label')}</div>
-                          <div className="text-xs text-muted-foreground">{t('newsSearch.preparing')}</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {part.type === 'tool-smartSearch' ? 'Ricerca notizie' : t('newsSearch.label')}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {part.type === 'tool-smartSearch' ? 'Preparazione ricerca notizie...' : t('newsSearch.preparing')}
+                          </div>
                         </div>
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       </div>
@@ -309,8 +332,12 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                           <Newspaper className="h-4 w-4" />
                         </div>
                         <div className="flex-1">
-                          <div className="text-sm font-medium text-foreground">{t('newsSearch.label')}</div>
-                          <div className="text-xs text-muted-foreground">{t('newsSearch.searching')}: {part.input?.query || '...'}</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {part.type === 'tool-smartSearch' ? 'Ricerca notizie' : t('newsSearch.label')}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {part.type === 'tool-smartSearch' ? 'Ricerca notizie in corso' : t('newsSearch.searching')}: {part.input?.query || '...'}
+                          </div>
                         </div>
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                       </div>
@@ -322,7 +349,9 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                           <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
                             <Newspaper className="h-4 w-4" />
                           </div>
-                          <div className="text-sm font-medium text-foreground">{t('newsSearch.completed')}</div>
+                          <div className="text-sm font-medium text-foreground">
+                            {part.type === 'tool-smartSearch' ? 'Ricerca notizie completata' : t('newsSearch.completed')}
+                          </div>
                         </div>
                         
                         {/* Card Immagini Notizie Separate - SOPRA il summary */}
@@ -389,7 +418,7 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                           <Newspaper className="h-4 w-4" />
                         </div>
                         <div className="text-sm text-destructive">
-                          {t('newsSearch.error')}: {part.errorText || t('generic.unknownError')}
+                          {part.type === 'tool-smartSearch' ? 'Errore ricerca notizie' : t('newsSearch.error')}: {part.errorText || t('generic.unknownError')}
                         </div>
                       </div>
                     );

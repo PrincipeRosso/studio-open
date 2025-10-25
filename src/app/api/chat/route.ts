@@ -3,7 +3,7 @@ import { openai } from '@ai-sdk/openai';
 import { createServerMessageService } from '@/lib/services/message-service';
 import { createServerThreadService } from '@/lib/services/thread-service';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
-import { webSearchTool, newsSearchTool } from '@/lib/tools/web-search-tool';
+import { smartSearchTool } from '@/lib/tools/web-search-tool';
 
 export async function POST(req: Request) {
   try {
@@ -33,22 +33,23 @@ export async function POST(req: Request) {
       case 'studio':
     systemMessage = `Sei un assistente AI chiamato Studio, progettato per aiutare gli utenti con conversazioni generali e supporto tecnico.
 
-    Hai accesso a strumenti di ricerca web che ti permettono di:
-    - Cercare informazioni aggiornate su qualsiasi argomento
-    - Trovare notizie recenti e sviluppi attuali
-    - Ottenere dati in tempo reale quando necessario
+    Hai accesso a UN SOLO strumento di ricerca intelligente:
 
-    Usa questi strumenti SOLO quando:
-    - L'utente chiede esplicitamente informazioni aggiornate o notizie
-    - Hai bisogno di dati che potrebbero essere cambiati di recente
-    - Le tue conoscenze potrebbero essere obsolete per l'argomento richiesto
+    SMART SEARCH TOOL - Ricerca intelligente che seleziona automaticamente:
+    - Per informazioni generali: guide, tutorial, spiegazioni tecniche, dati, statistiche, definizioni, ricerche accademiche, cultura, scienza, prodotti, servizi, aziende, persone famose, eventi storici, luoghi, tecnologia generale
+    - Per notizie recenti: eventi di cronaca, sviluppi politici, economia attuale, sport recenti, emergenze, catastrofi, elezioni, annunci aziendali recenti, lanci prodotti, summit internazionali, cambiamenti normativi
+
+    REGOLE CRITICHE:
+    - USA SEMPRE SOLO IL SMART SEARCH TOOL
+    - Il tool seleziona automaticamente tra ricerca web e notizie
+    - NON usare mai altri tool di ricerca
+    - Una sola ricerca per richiesta
 
     IMPORTANTE LINGUA:
     - Rispondi SEMPRE nella stessa lingua della query dell'utente
     - Se l'utente scrive in italiano, rispondi SEMPRE in italiano
     - Se l'utente scrive in inglese, rispondi SEMPRE in inglese
     - NON cambiare mai lingua durante la conversazione
-    - Usa UN SOLO tool per richiesta, non fare multiple ricerche automatiche
 
     IMPORTANTE - DOPO aver usato i tool di ricerca web:
     I tool hanno GIÀ fornito un SUMMARY DETTAGLIATO delle informazioni/notizie trovate.
@@ -70,11 +71,11 @@ export async function POST(req: Request) {
     Tu: "ChatGPT è un modello di linguaggio... [ripete il summary del tool]... Come mostrato nelle fonti..."
 
     I tool ti forniranno anche un'istruzione specifica sulla lingua da usare nel campo 'languageInstruction'.`;
-        tools = [webSearchTool, newsSearchTool];
+        tools = [smartSearchTool];
         break;
       default:
         systemMessage = 'Sei un assistente AI utile e cordiale.';
-        tools = [webSearchTool, newsSearchTool];
+        tools = [smartSearchTool];
     }
 
     // Converti i UIMessage in ModelMessage per streamText
@@ -120,8 +121,7 @@ export async function POST(req: Request) {
       model: openai(selectedModel),
       messages: messagesWithSystem,
       tools: tools.length > 0 ? {
-        webSearch: webSearchTool,
-        newsSearch: newsSearchTool,
+        smartSearch: smartSearchTool,
       } : undefined,
       stopWhen: stepCountIs(2), // Ridotto a 2 step per evitare multiple chiamate automatiche
     });

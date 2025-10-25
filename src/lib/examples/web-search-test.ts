@@ -8,7 +8,7 @@ export async function testWebSearch() {
     console.log('🔍 Testando la ricerca web...');
     
     // Test ricerca generale
-    const searchResults = await tavilyService.search('ultime notizie tecnologia AI 2024', {
+    const searchResults = await tavilyService.instance.search('ultime notizie tecnologia AI 2024', {
       maxResults: 3,
       includeAnswer: true,
     });
@@ -21,7 +21,7 @@ export async function testWebSearch() {
     });
     
     // Test ricerca notizie
-    const newsResults = await tavilyService.searchNews('OpenAI GPT-4', 2);
+    const newsResults = await tavilyService.instance.searchNews('OpenAI GPT-4', 2);
     
     console.log('📰 Risultati notizie:', {
       query: newsResults.query,

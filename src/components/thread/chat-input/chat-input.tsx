@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle, useCallback, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Loader2, ArrowUp, Paperclip } from 'lucide-react';
+import { Loader2, ArrowUp, Paperclip, Settings2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { AgentModelSelector, Agent, Model, defaultAgents, defaultModels } from './agent-model-selector';
@@ -130,6 +130,11 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
       setUploadedFiles(prev => prev.filter((_, i) => i !== index));
     };
 
+    const handleThirdPartyApps = () => {
+      // TODO: Implementare logica per integrazione app terze
+      console.log('Integrazione app terze cliccata');
+    };
+
     // Skeleton per lo stato di caricamento
     if (isLoading) {
       return (
@@ -195,7 +200,7 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
               </div>
 
               <div className="flex items-center justify-between px-3 pb-3">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileSelect} accept="*/*" />
                   <TooltipProvider>
                     <Tooltip>
@@ -204,7 +209,7 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={loading || disabled || isUploading}
-                          className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full transition-all duration-200 hover:bg-muted/50 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-200 hover:bg-muted/50 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isUploading ? (
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -218,6 +223,26 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
+                  
+                  {/* Third Party Apps Integration */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={handleThirdPartyApps}
+                          disabled={loading || disabled}
+                          className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-200 hover:bg-muted/50 active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Settings2 className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        <p>Integrazioni App Terze</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  
                   {/* Agent and Model Selector */}
                   <AgentModelSelector
                     selectedAgent={selectedAgent}
@@ -238,7 +263,7 @@ export const ChatInput = memo(forwardRef<ChatInputHandles, ChatInputProps>(
                         onClick={handleSubmit}
                         disabled={(!value.trim() && uploadedFiles.length === 0) || loading || disabled || isUploading}
                         className={cn(
-                          "w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full transition-all duration-200 active:scale-95",
+                          "w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-95",
                           (value.trim() || uploadedFiles.length > 0) && !loading && !disabled && !isUploading
                             ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
                             : "bg-muted text-muted-foreground cursor-not-allowed"

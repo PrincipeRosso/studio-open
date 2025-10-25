@@ -68,6 +68,57 @@ export const AgentModelSelector: React.FC<AgentModelSelectorProps> = ({
 
   return (
     <>
+      {/* Model Selector */}
+      <DropdownMenu open={modelDropdownOpen} onOpenChange={setModelDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={disabled}
+            className={cn(
+              "h-8 px-2 hover:bg-muted/50",
+              "flex items-center justify-center min-w-0"
+            )}
+          >
+            <Cpu className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+            Seleziona Modello
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {models.map((model) => (
+            <DropdownMenuItem
+              key={model.id}
+              onClick={() => {
+                onModelChange(model);
+                setModelDropdownOpen(false);
+              }}
+              className={cn(
+                "cursor-pointer text-sm",
+                selectedModel.id === model.id && "bg-accent"
+              )}
+            >
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center gap-2">
+                  <Cpu className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-medium">{model.name}</span>
+                </div>
+                <div className="flex items-center gap-2 ml-6">
+                  <span className="text-xs text-muted-foreground">{model.provider}</span>
+                </div>
+                {model.description && (
+                  <span className="text-xs text-muted-foreground ml-6">
+                    {model.description}
+                  </span>
+                )}
+              </div>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       {/* Agent Selector */}
       <DropdownMenu open={agentDropdownOpen} onOpenChange={setAgentDropdownOpen}>
         <DropdownMenuTrigger asChild>
@@ -76,12 +127,11 @@ export const AgentModelSelector: React.FC<AgentModelSelectorProps> = ({
             size="sm"
             disabled={disabled}
             className={cn(
-              "h-7 px-2 text-xs font-normal hover:bg-muted/50",
+              "h-8 px-2 text-xs font-normal hover:bg-muted/50",
               "flex items-center gap-1.5 min-w-0"
             )}
           >
             <StudioIcon size={12} className="flex-shrink-0" />
-            <span className="truncate">{selectedAgent.name}</span>
             <ChevronDown className="h-3 w-3 flex-shrink-0 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
@@ -110,55 +160,6 @@ export const AgentModelSelector: React.FC<AgentModelSelectorProps> = ({
                 {agent.description && (
                   <span className="text-xs text-muted-foreground ml-5">
                     {agent.description}
-                  </span>
-                )}
-              </div>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Model Selector */}
-      <DropdownMenu open={modelDropdownOpen} onOpenChange={setModelDropdownOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={disabled}
-            className={cn(
-              "h-8 w-8 p-0 hover:bg-muted/50",
-              "flex items-center justify-center"
-            )}
-          >
-            <Cpu className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-            Seleziona Modello
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {models.map((model) => (
-            <DropdownMenuItem
-              key={model.id}
-              onClick={() => {
-                onModelChange(model);
-                setModelDropdownOpen(false);
-              }}
-              className={cn(
-                "cursor-pointer text-sm",
-                selectedModel.id === model.id && "bg-accent"
-              )}
-            >
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <Cpu className="h-3 w-3 text-muted-foreground" />
-                  <span className="font-medium">{model.name}</span>
-                  <span className="text-xs text-muted-foreground">({model.provider})</span>
-                </div>
-                {model.description && (
-                  <span className="text-xs text-muted-foreground ml-5">
-                    {model.description}
                   </span>
                 )}
               </div>

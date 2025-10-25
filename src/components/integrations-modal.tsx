@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import { ComposioApp, ComposioConnection } from '@/lib/services/composio-service';
 import { GoogleCalendarIcon } from '@/components/google-calendar-icon';
+import { CanvaIcon } from '@/components/canva-icon';
 import { useTranslations } from 'next-intl';
 
 interface IntegrationsModalProps {
@@ -147,6 +148,12 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
       return <GoogleCalendarIcon className="w-8 h-8" />;
     }
     
+    // Icona speciale per Canva
+    if (appName?.toLowerCase().includes('canva') ||
+        (app as ComposioApp).id?.toLowerCase().includes('canva')) {
+      return <CanvaIcon className="w-8 h-8" />;
+    }
+    
     if (iconUrl) {
       return (
         <img 
@@ -217,13 +224,13 @@ export const IntegrationsModal: React.FC<IntegrationsModalProps> = ({
         <div className="flex-1 overflow-hidden flex flex-col gap-4">
           {/* Filtri e ricerca */}
           <div className="flex items-center gap-3">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="relative flex-1 max-w-sm overflow-hidden rounded-lg">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
               <Input
                 placeholder={t('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-9 bg-muted/50 border-0 rounded-lg placeholder:text-muted-foreground/60 focus-visible:bg-background transition-colors"
+                className="pl-10 h-9 bg-muted/50 border-0 rounded-lg placeholder:text-muted-foreground/60 focus-visible:bg-background hover:bg-background transition-colors w-full"
               />
             </div>
 

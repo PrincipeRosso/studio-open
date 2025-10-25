@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { ComposioApp, ComposioConnection } from '@/lib/services/composio-service';
 import { IntegrationsModal } from '@/components/integrations-modal';
 import { GoogleCalendarIcon } from '@/components/google-calendar-icon';
+import { CanvaIcon } from '@/components/canva-icon';
 import { useTranslations } from 'next-intl';
 
 interface ThirdPartyAppsDropdownProps {
@@ -146,6 +147,12 @@ export const ThirdPartyAppsDropdown: React.FC<ThirdPartyAppsDropdownProps> = ({
         appName?.toLowerCase().includes('googlecalendar') ||
         (app as ComposioApp).id?.toLowerCase().includes('googlecalendar')) {
       return <GoogleCalendarIcon className="w-5 h-5" />;
+    }
+    
+    // Icona speciale per Canva
+    if (appName?.toLowerCase().includes('canva') ||
+        (app as ComposioApp).id?.toLowerCase().includes('canva')) {
+      return <CanvaIcon className="w-5 h-5" />;
     }
     
     if (iconUrl) {

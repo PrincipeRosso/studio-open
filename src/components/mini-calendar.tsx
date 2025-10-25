@@ -57,11 +57,11 @@ export const MiniCalendar: React.FC<MiniCalendarProps> = ({
       <div className="flex-shrink-0">
         <div className="w-12 h-12 rounded-lg overflow-hidden border border-border shadow-sm">
           {/* Header del calendario */}
-          <div className="bg-blue-600 text-white text-[10px] font-medium text-center py-0.5">
+          <div className="bg-primary text-primary-foreground text-[10px] font-medium text-center py-0.5">
             {month.toUpperCase()}
           </div>
           {/* Giorno del mese */}
-          <div className="bg-white text-foreground text-xl font-bold text-center leading-none pt-1.5 pb-1">
+          <div className="bg-card text-card-foreground text-xl font-bold text-center leading-none pt-1.5 pb-1">
             {dayOfMonth}
           </div>
         </div>

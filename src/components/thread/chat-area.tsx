@@ -3,8 +3,9 @@
 import React, { useEffect, useRef } from 'react'
 import { StudioIcon } from '@/components/studio-icon'
 import { GoogleCalendarIcon } from '@/components/google-calendar-icon'
+import { CanvaIcon } from '@/components/canva-icon'
 import { MiniCalendar } from '@/components/mini-calendar'
-import { User, Search, Newspaper, Loader2, Mail, MessageSquare, Github, Slack, FileText } from 'lucide-react'
+import { User, Search, Newspaper, Loader2, Mail, MessageSquare, Github, Slack, FileText, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { isNewsQuery } from '@/lib/tools/web-search-tool'
@@ -289,6 +290,147 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
   )
 }
 
+// Funzione per processare il contenuto e riconoscere i link di Canva
+const processMessageContent = (content: string) => {
+  console.log('🔍 Processando contenuto:', content);
+  
+  // Test con un link semplice per debug
+  if (content.includes('@https://www.canva.com/test')) {
+    console.log('🧪 Test link trovato!');
+  }
+  
+  // Test con link senza @
+  if (content.includes('https://www.canva.com/api/design/')) {
+    console.log('🧪 Link Canva API trovato!');
+  }
+  
+  // Regex per riconoscere i link di Canva - sia con @ che senza
+  const canvaLinkRegex = /(?:@)?(https:\/\/www\.canva\.com\/[^\s\)]+)/g;
+  
+  const parts: Array<{ type: 'text' | 'canva-link', content: string, url?: string }> = [];
+  let lastIndex = 0;
+  let match;
+  
+  while ((match = canvaLinkRegex.exec(content)) !== null) {
+    console.log('🎨 Link Canva trovato:', match[0], 'URL:', match[1]);
+    
+    // Aggiungi il testo prima del link
+    if (match.index > lastIndex) {
+      parts.push({
+        type: 'text',
+        content: content.slice(lastIndex, match.index)
+      });
+    }
+    
+    // Aggiungi il link di Canva
+    parts.push({
+      type: 'canva-link',
+      content: match[1], // URL senza @
+      url: match[1]
+    });
+    
+    lastIndex = match.index + match[0].length;
+  }
+  
+  // Aggiungi il testo rimanente
+  if (lastIndex < content.length) {
+    parts.push({
+      type: 'text',
+      content: content.slice(lastIndex)
+    });
+  }
+  
+  console.log('📦 Parti processate:', parts);
+  return parts;
+}
+
+// Componente per renderizzare un link di Canva
+const CanvaLinkCard: React.FC<{ url: string }> = ({ url }) => {
+  console.log('🎨 Rendering CanvaLinkCard con URL:', url);
+  const t = useTranslations('tools.composio');
+  
+  // Estrai l'ID del design dall'URL per creare l'URL di preview
+  const getPreviewUrl = (url: string) => {
+    try {
+      // Estrai l'ID del design dall'URL
+      const designIdMatch = url.match(/\/design\/([^\/\?]+)/);
+      if (designIdMatch) {
+        const designId = designIdMatch[1];
+        // URL per la preview dell'immagine (formato thumbnail)
+        return `https://www.canva.com/api/design/${designId}/thumbnail?width=400&height=300&format=png`;
+      }
+    } catch (error) {
+      console.error('Errore nel parsing URL Canva:', error);
+    }
+    return null;
+  };
+  
+  const previewUrl = getPreviewUrl(url);
+  
+  return (
+    <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 rounded-lg border border-purple-200 dark:border-purple-800">
+      <div className="flex items-start gap-3">
+        <div className="flex-shrink-0">
+          <CanvaIcon className="w-8 h-8" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="mb-1">
+            <h4 className="font-semibold text-purple-900 dark:text-purple-100">
+              {t('canva')} Design
+            </h4>
+          </div>
+          <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
+            Design creato con Canva
+          </p>
+          
+          {/* Preview della slide */}
+          {previewUrl && (
+            <div className="mb-3">
+              <div className="relative rounded-lg overflow-hidden border border-purple-200 dark:border-purple-700 bg-white dark:bg-gray-800">
+                <img
+                  src={previewUrl}
+                  alt="Preview del design Canva"
+                  className="w-full h-auto max-h-48 object-contain"
+                  onError={(e) => {
+                    console.log('❌ Errore caricamento preview Canva:', previewUrl);
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      const placeholder = document.createElement('div');
+                      placeholder.className = 'w-full h-32 bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400';
+                      placeholder.innerHTML = `
+                        <div class="text-center">
+                          <p class="text-sm font-medium">Preview non disponibile</p>
+                        </div>
+                      `;
+                      parent.appendChild(placeholder);
+                    }
+                  }}
+                />
+                {/* Overlay con icona Canva */}
+                <div className="absolute top-2 right-2 bg-white/90 dark:bg-gray-800/90 rounded-full p-1">
+                  <CanvaIcon className="w-4 h-4" />
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-md transition-colors"
+          >
+            <span>Apri in Canva</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const isUser = message.role === 'user'
   const t = useTranslations('tools')
@@ -339,6 +481,7 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
               if (isComposioTool) {
                 const getComposioIcon = (name: string) => {
                   if (name.startsWith('GOOGLECALENDAR_')) return <GoogleCalendarIcon className="h-4 w-4" />
+                  if (name.startsWith('CANVA_')) return <CanvaIcon className="h-4 w-4" />
                   if (name.startsWith('GMAIL_')) return <Mail className="h-4 w-4" />
                   if (name.startsWith('SLACK_')) return <Slack className="h-4 w-4" />
                   if (name.startsWith('GITHUB_')) return <Github className="h-4 w-4" />
@@ -352,6 +495,7 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
                   
                   const appNames: Record<string, string> = {
                     'googlecalendar': t('composio.googleCalendar'),
+                    'canva': t('composio.canva'),
                     'gmail': t('composio.gmail'),
                     'slack': t('composio.slack'),
                     'github': t('composio.github'),
@@ -735,8 +879,16 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
             
             {/* Poi mostra il testo dopo i tool calls */}
             {message.parts.filter(part => part.type === 'text').map((part, index) => (
-              <div key={`text-${index}`} className="text-base leading-relaxed whitespace-pre-wrap">
-                {part.text}
+              <div key={`text-${index}`} className="text-base leading-relaxed">
+                {processMessageContent(part.text || '').map((contentPart, contentIndex) => (
+                  <React.Fragment key={contentIndex}>
+                    {contentPart.type === 'text' ? (
+                      <span className="whitespace-pre-wrap">{contentPart.content}</span>
+                    ) : (
+                      <CanvaLinkCard url={contentPart.url!} />
+                    )}
+                  </React.Fragment>
+                ))}
               </div>
             ))}
           </div>
@@ -744,15 +896,31 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
         
         {/* Per messaggi utente: mostra solo il contenuto */}
         {isUser && message.content && (
-          <div className="text-base leading-relaxed whitespace-pre-wrap">
-            {message.content}
+          <div className="text-base leading-relaxed">
+            {processMessageContent(message.content).map((part, index) => (
+              <React.Fragment key={index}>
+                {part.type === 'text' ? (
+                  <span className="whitespace-pre-wrap">{part.content}</span>
+                ) : (
+                  <CanvaLinkCard url={part.url!} />
+                )}
+              </React.Fragment>
+            ))}
           </div>
         )}
         
         {/* Per messaggi assistente senza parts: mostra il contenuto */}
         {!isUser && (!message.parts || message.parts.length === 0) && message.content && (
-          <div className="text-base leading-relaxed whitespace-pre-wrap">
-            {message.content}
+          <div className="text-base leading-relaxed">
+            {processMessageContent(message.content).map((part, index) => (
+              <React.Fragment key={index}>
+                {part.type === 'text' ? (
+                  <span className="whitespace-pre-wrap">{part.content}</span>
+                ) : (
+                  <CanvaLinkCard url={part.url!} />
+                )}
+              </React.Fragment>
+            ))}
           </div>
         )}
       </div>

@@ -93,9 +93,9 @@ async function executeWebSearch(query: string) {
     const results = await tavilyService.instance.search(query, {
       maxResults: 5, // Ridotto per evitare timeout
       includeAnswer: true,
-      includeRawContent: false, // Disabilitato per ridurre carico
+      includeRawContent: true, // Disabilitato per ridurre carico
       includeImages: true,
-      searchDepth: 'basic', // Ridotto per evitare timeout
+      searchDepth: 'advanced', // Ridotto per evitare timeout
       includeDomains: domainConfig.includeDomains
     });
 

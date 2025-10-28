@@ -5,7 +5,7 @@ import { StudioIcon } from '@/components/studio-icon'
 import { GoogleCalendarIcon } from '@/components/google-calendar-icon'
 import { CanvaIcon } from '@/components/canva-icon'
 import { MiniCalendar } from '@/components/mini-calendar'
-import { User, Search, Newspaper, Loader2, Mail, MessageSquare, Github, Slack, FileText, ExternalLink } from 'lucide-react'
+import { User, Search, Newspaper, Loader2, Mail, MessageSquare, Github, Slack, FileText, ExternalLink, ListChecks, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 import { isNewsQuery } from '@/lib/tools/web-search-tool'
@@ -66,6 +66,16 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
         return <Newspaper className="h-4 w-4" />
     }
     
+    // Tool task planning
+    if (toolName === 'taskPlanning') {
+        return <ListChecks className="h-4 w-4" />
+    }
+    
+    // Tool task completion
+    if (toolName === 'taskCompleted') {
+        return <CheckCircle2 className="h-4 w-4" />
+    }
+    
     // Tool Composio - Google Calendar
     if (toolName.startsWith('GOOGLECALENDAR_')) {
       return <GoogleCalendarIcon className="h-4 w-4" />
@@ -101,6 +111,16 @@ const ToolCallIndicator: React.FC<{ toolName: string; args: any }> = ({ toolName
     }
     if (toolName === 'newsSearch') {
       return t('newsSearch.label')
+    }
+    
+    // Tool task planning
+    if (toolName === 'taskPlanning') {
+      return 'Task Planning'
+    }
+    
+    // Tool task completion
+    if (toolName === 'taskCompleted') {
+      return 'Task Completed'
     }
     
     // Tool Composio - formatta il nome
@@ -177,6 +197,16 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
         return <Newspaper className="h-4 w-4" />
     }
     
+    // Tool task planning
+    if (toolName === 'taskPlanning') {
+        return <ListChecks className="h-4 w-4" />
+    }
+    
+    // Tool task completion
+    if (toolName === 'taskCompleted') {
+        return <CheckCircle2 className="h-4 w-4" />
+    }
+    
     // Tool Composio - Google Calendar
     if (toolName.startsWith('GOOGLECALENDAR_')) {
       return <GoogleCalendarIcon className="h-4 w-4" />
@@ -212,6 +242,16 @@ const ToolResult: React.FC<{ toolName: string; result: any }> = ({ toolName, res
     }
     if (toolName === 'newsSearch') {
       return t('newsSearch.completed')
+    }
+    
+    // Tool task planning
+    if (toolName === 'taskPlanning') {
+      return 'Task Planning'
+    }
+    
+    // Tool task completion
+    if (toolName === 'taskCompleted') {
+      return 'Task Completed'
     }
     
     // Tool Composio - formatta il nome
